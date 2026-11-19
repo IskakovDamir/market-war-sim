@@ -117,7 +117,7 @@ def view_public(state, cp):
         chg = ''
         if prev.get(cid) and prev[cid].get('positioning') != p.get('positioning'):
             chg = '<div class="chg">позиционирование изменилось</div>'
-        plans = ''.join(f'<tr><td>{E(x["name"])}</td><td>{"бесплатно" if x["price"]==0 else "$"+str(x["price"])+" в месяц"}</td></tr>' for x in p.get('plans', []))
+        plans = ''.join(f'<tr><td>{E(x["name"])}</td><td>{"по запросу" if x["price"] is None else ("бесплатно" if x["price"]==0 else "$"+str(x["price"])+" в месяц")}</td></tr>' for x in p.get('plans', []))
         extra = f'<div class="lbl">заявление</div><div class="ad">{E(p["announce"])}</div>' if p.get('announce') else ''
         cards.append(f'''<div class="card">{head(cid)}{chg}</div>
 <div class="lbl">позиционирование</div><div class="pv">{E(p.get("positioning",""))}</div>
@@ -298,6 +298,172 @@ def view_wait():
     cards = ''.join(f'<div class="card">{head(c)}</div><div class="lbl">бюджет на игру</div><div class="pv">{money(CO[c]["budget"])}</div><div class="lbl">выручка в месяц на старте</div><div class="pv">{money(sum(CO[c]["paid"].values())*CO[c]["price"])}</div><div class="lbl">цель роли</div><div class="ad">{E(CO[c]["goal"])}</div></div>' for c in ORDER)
     body = f'<h1>дашборд рынка<span>до старта игры</span></h1><div class="sub">После чекпоинта 1 здесь появятся открытые части ходов всех компаний</div><div class="grid">{cards}</div>'
     return page('Рыночная война · дашборд', body, 'старт')
+
+# ================= simulation 1: market view (public) and team view (private) =================
+CSS2 = """
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:22px}
+.kpi{background:#fff;border-radius:18px;padding:26px 30px}
+.kpi .k{font-size:17px;font-weight:600;color:#5B6675}
+.kpi .v{font-size:52px;font-weight:600;letter-spacing:-.03em;line-height:1.1;margin-top:8px;font-variant-numeric:tabular-nums}
+.kpi .d{font-size:19px;color:#5B6675;margin-top:4px}
+.kpi .d b{color:#04131B;font-weight:700}
+.kpi svg{display:block;margin-top:14px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.ct{font-size:24px;font-weight:600;letter-spacing:-.02em;margin-bottom:4px}
+.cs{font-size:17px;color:#5B6675;margin-bottom:18px}
+.key{display:flex;gap:22px;font-size:16px;color:#5B6675;margin-bottom:12px}.key span{display:flex;align-items:center;gap:8px}.key i{width:14px;height:14px;border-radius:3px;display:inline-block}
+.priv{display:inline-block;color:#F5000D;font-weight:700;font-size:18px;margin-top:10px}
+.ev{font-size:18px;line-height:1.5;padding:10px 0;border-top:1px solid #E6ECF5}
+@media (max-width:700px){.kpis,.two{grid-template-columns:1fr;gap:14px}.kpis{margin-bottom:14px}.kpi{padding:20px 18px}.kpi .v{font-size:40px}.kpi svg{max-width:100%;height:auto}.key{flex-wrap:wrap;gap:10px 18px}}
+"""
+GREY, RED, INK, MUTED, TRACK = '#B9C3D0', '#F5000D', '#04131B', '#5B6675', '#EEF2F8'
+SEG_ORDER = [s["id"] for s in SEGMENTS]
+SEG_NAME = SEGN
+SEG_SIZE = {s['id']: s['size'] for s in SEGMENTS}
+
+def start_seg_users(cid):
+    c = CO[cid]; tp = max(1, sum(c['paid'].values()))
+    return {s: c['paid'][s] + c['free'] * c['paid'][s] / tp for s in SEG_ORDER}
+
+def k_(v):
+    v = float(v)
+    if abs(v) >= 1e6: return f'{v/1e6:.2f}M'.replace('.00M', 'M')
+    if abs(v) >= 1e4: return f'{v/1000:.0f}k'
+    if abs(v) >= 1e3: return f'{v/1000:.1f}k'
+    return f'{v:.0f}'
+
+def spark(vals, w=300, h=56):
+    mx = max(vals) * 1.05; mn = min(vals) * 0.9
+    pts = [(8 + (w - 16) * i / (len(vals) - 1), h - 8 - (h - 16) * (v - mn) / ((mx - mn) or 1)) for i, v in enumerate(vals)]
+    path = ' '.join(f'{x:.1f},{y:.1f}' for x, y in pts)
+    dots = ''.join(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="{5 if i == len(pts)-1 else 3.5}" fill="{RED if i == len(pts)-1 else GREY}" stroke="#fff" stroke-width="2"/>' for i, (x, y) in enumerate(pts))
+    return f'<svg viewBox="0 0 {w} {h}" width="{w}" height="{h}"><polyline points="{path}" fill="none" stroke="{RED}" stroke-width="2.5" stroke-linejoin="round"/>{dots}</svg>'
+
+def meter(frac, mark=None, w=300):
+    f = max(0, min(1, frac)); x = 6 + (w - 12) * f
+    m = '' if mark is None else f'<line x1="{6+(w-12)*max(0,min(1,mark)):.0f}" y1="2" x2="{6+(w-12)*max(0,min(1,mark)):.0f}" y2="30" stroke="{INK}" stroke-width="2.5"/>'
+    return f'<svg viewBox="0 0 {w} 32" width="{w}" height="32"><rect x="6" y="9" width="{w-12}" height="14" rx="4" fill="{TRACK}"/><rect x="6" y="9" width="{max(4,x-6):.0f}" height="14" rx="4" fill="{RED}"/>{m}</svg>'
+
+def quarter_cols(vals, labels, title):
+    W, H, B, T = 620, 360, 300, 40
+    step, mx = nice(max(vals) * 1.15)
+    bw = 110; gap = (W - 80 - bw * len(vals)) / (len(vals))
+    out = [f'<svg viewBox="0 0 {W} {H}" width="100%" role="img" aria-label="{E(title)}">']
+    for k in range(0, int(round(mx / step)) + 1):
+        v = step * k; y = B - (B - T) * v / mx
+        out.append(f'<line x1="70" y1="{y:.0f}" x2="{W}" y2="{y:.0f}" stroke="#E6ECF5"/><text x="60" y="{y+5:.0f}" font-size="15" fill="{MUTED}" text-anchor="end">{k_(v)}</text>')
+    for i, v in enumerate(vals):
+        x = 80 + gap / 2 + i * (bw + gap); h = (B - T) * v / mx
+        col = GREY if i == 0 else RED
+        d = '' if i == 0 else f'<text x="{x+bw/2:.0f}" y="{B-h-36:.0f}" font-size="15" fill="{MUTED}" text-anchor="middle">{(v-vals[0])/vals[0]*100:+.0f}% к старту</text>'
+        out.append(f'<path d="M{x:.0f},{B} V{B-h+4:.0f} q0,-4 4,-4 H{x+bw-4:.0f} q4,0 4,4 V{B} Z" fill="{col}"><title>{labels[i]}: {fmt(v)}</title></path>')
+        out.append(f'<text x="{x+bw/2:.0f}" y="{B-h-12:.0f}" font-size="20" font-weight="700" fill="{INK}" text-anchor="middle">{k_(v)}</text>{d}')
+        out.append(f'<text x="{x+bw/2:.0f}" y="{B+28}" font-size="17" fill="{INK}" text-anchor="middle">{labels[i]}</text>')
+    out.append(f'<line x1="70" y1="{B}" x2="{W}" y2="{B}" stroke="{INK}" stroke-width="1.5"/></svg>')
+    return ''.join(out)
+
+def seg_rows(start, now, scale, icp=None, cap=None):
+    """horizontal paired bars: start (grey) and now (red) per segment on one scale"""
+    W, L, RH = 1240, 300, 86
+    step, mx = nice(scale * 1.05)
+    H = RH * len(SEG_ORDER) + 34
+    out = [f'<svg viewBox="0 0 {W} {H}" width="100%" role="img" aria-label="Пользователи по сегментам">']
+    PW = W - L - 170
+    for k in range(0, int(round(mx / step)) + 1):
+        v = step * k; x = L + PW * v / mx
+        out.append(f'<line x1="{x:.0f}" y1="0" x2="{x:.0f}" y2="{H-28}" stroke="#E6ECF5"/><text x="{x:.0f}" y="{H-6}" font-size="15" fill="{MUTED}" text-anchor="middle">{k_(v)}</text>')
+    for i, s in enumerate(SEG_ORDER):
+        y = i * RH + 10; a, b = start[s], now[s]
+        wa, wb = PW * a / mx, PW * b / mx
+        nm = SEG_NAME[s]
+        out.append(f'<text x="0" y="{y+26}" font-size="20" font-weight="600" fill="{INK}">{E(nm)}</text>')
+        sub = 'ваш ICP' if icp == s else (f'рынок {k_(SEG_SIZE[s])} человек' if cap else '')
+        if sub: out.append(f'<text x="0" y="{y+52}" font-size="16" fill="{RED if icp == s else MUTED}" font-weight="{700 if icp == s else 400}">{sub}</text>')
+        out.append(f'<rect x="{L}" y="{y+6}" width="{max(3,wa):.0f}" height="22" rx="4" fill="{GREY}"><title>{E(nm)}, на старте: {fmt(a)}</title></rect>')
+        out.append(f'<rect x="{L}" y="{y+32}" width="{max(3,wb):.0f}" height="30" rx="4" fill="{RED}"><title>{E(nm)}, сейчас: {fmt(b)}</title></rect>')
+        d = (b - a) / a * 100 if a > 0 else 0
+        out.append(f'<text x="{L+max(3,wa)+10:.0f}" y="{y+23}" font-size="15" fill="{MUTED}">{k_(a)}</text>')
+        out.append(f'<text x="{L+max(3,wb)+10:.0f}" y="{y+54}" font-size="19" font-weight="700" fill="{INK}">{k_(b)}<tspan font-size="16" font-weight="500" fill="{MUTED}">  {d:+.0f}%</tspan></text>')
+    out.append('</svg>')
+    return ''.join(out)
+
+def key2():
+    return f'<div class="key"><span><i style="background:{GREY}"></i>на старте</span><span><i style="background:{RED}"></i>после 2 кварталов</span></div>'
+
+def page2(title, body, when):
+    return page(title, body, when).replace('</style>', CSS2 + '</style>', 1)
+
+def view_sim1_market(state, res):
+    hist = res['hist']; cids = [c for c in ORDER]
+    tot0 = sum(start_users().values())
+    tots = [tot0] + [sum(h[c]['users'] for c in h) for h in hist]
+    seg0 = {s: sum(start_seg_users(c)[s] for c in cids) for s in SEG_ORDER}
+    segN = {s: sum(hist[-1][c]['seg_users'][s] for c in hist[-1]) for s in SEG_ORDER}
+    pop = sum(SEG_SIZE.values())
+    grow = {s: (segN[s] - seg0[s]) / seg0[s] * 100 for s in SEG_ORDER}
+    top = max(grow, key=grow.get)
+    new_users = tots[-1] - tot0
+    kp = f'''<div class="kpis">
+<div class="kpi"><div class="k">пользователей на рынке</div><div class="v">{k_(tots[-1])}</div><div class="d"><b>{(tots[-1]-tot0)/tot0*100:+.0f}%</b> к старту, было {k_(tot0)}</div>{spark(tots)}</div>
+<div class="kpi"><div class="k">охват рынка</div><div class="v">{tots[-1]/pop*100:.0f}%</div><div class="d">из {k_(pop)} человек во всех сегментах, на старте <b>{tot0/pop*100:.0f}%</b></div>{meter(tots[-1]/pop, tot0/pop)}</div>
+<div class="kpi"><div class="k">быстрее всех растёт</div><div class="v" style="font-size:40px;line-height:1.2">{E(SEG_NAME[top])}</div><div class="d"><b>{grow[top]:+.0f}%</b> пользователей за 2 квартала</div></div>
+</div>'''
+    pred = state.get('predictions') or {}
+    ptab = ''
+    if pred:
+        last = hist[-1]; errs = {}
+        for team, guess in pred.items():
+            e = [abs(guess[c] - last[c]['users']) / last[c]['users'] for c in guess if c in last and c != team]
+            if e: errs[team] = sum(e) / len(e) * 100
+        best = min(errs, key=errs.get) if errs else None
+        rows = ''.join(f'<tr><td>{E(CO[t]["name"])}</td><td class="n">{errs[t]:.0f}%</td><td style="color:{RED};font-weight:700">{"+5 баллов" if t == best else ""}</td></tr>' for t in sorted(errs, key=errs.get))
+        ptab = f'<div class="wide"><div class="ct">точность прогнозов</div><div class="cs">Средняя ошибка прогноза пользователей конкурентов. Сами цифры компаний закрыты до финала</div><table class="t"><tr><th>команда</th><th class="n">ошибка</th><th></th></tr>{rows}</table></div>'
+    body = f'''<h1>симуляция 1<span>рынок после двух кварталов</span></h1>
+<div class="sub">Только рынок целиком. Цифры каждой компании команды получают отдельно, свои</div>
+{kp}
+<div class="two"><div class="wide"><div class="ct">пользователи на рынке</div><div class="cs">Бесплатные и платящие вместе, все компании</div>{quarter_cols(tots, ['старт', 'квартал 1', 'квартал 2'], 'Пользователи на рынке по кварталам')}</div>
+<div class="wide"><div class="ct">куда пришли новые пользователи</div><div class="cs">Изменение за 2 квартала. Процент: доля от всего прироста</div>{share_bars({s: segN[s]-seg0[s] for s in SEG_ORDER})}</div></div>
+<div class="wide"><div class="ct">сегменты: старт и сейчас</div><div class="cs">Сколько пользователей у всех компаний вместе в каждом сегменте</div>{key2()}{seg_rows(seg0, segN, max(max(segN.values()), max(seg0.values())), cap=True)}</div>
+{ptab}'''
+    return page2('Симуляция 1 · рынок', body, 'после чекпоинта 2')
+
+def share_bars(d):
+    W, L, RH = 620, 250, 58
+    tot = sum(max(0, v) for v in d.values()) or 1
+    mx = max(max(d.values()), 1)
+    H = RH * len(d) + 6
+    out = [f'<svg viewBox="0 0 {W} {H}" width="100%" role="img" aria-label="Прирост по сегментам">']
+    for i, s in enumerate(sorted(d, key=lambda x: -d[x])):
+        y = i * RH + 6; v = d[s]; w = (W - L - 120) * max(0, v) / mx
+        out.append(f'<text x="0" y="{y+28}" font-size="18" font-weight="600" fill="{INK}">{E(SEG_NAME[s])}</text>')
+        out.append(f'<rect x="{L}" y="{y+8}" width="{W-L-120}" height="28" rx="4" fill="{TRACK}"/><rect x="{L}" y="{y+8}" width="{max(3,w):.0f}" height="28" rx="4" fill="{RED if v > 0 else GREY}"><title>{E(SEG_NAME[s])}: {v:+,.0f}</title></rect>')
+        out.append(f'<text x="{W-108}" y="{y+29}" font-size="18" font-weight="700" fill="{INK}">{"+" if v>=0 else ""}{k_(v)}<tspan font-size="15" font-weight="500" fill="{MUTED}">{"  " + format(v/tot*100, ".0f") + "%" if v > 0 else "  спад"}</tspan></text>')
+    out.append('</svg>')
+    return ''.join(out)
+
+def view_sim1_team(state, res, cid):
+    hist = res['hist']; c = CO[cid]
+    su = start_users()[cid]
+    us = [su] + [h[cid]['users'] for h in hist]
+    tot0 = sum(start_users().values()); totN = sum(hist[-1][x]['users'] for x in hist[-1])
+    sh0, shN = su / tot0 * 100, us[-1] / totN * 100
+    s0 = start_seg_users(cid); sN = hist[-1][cid]['seg_users']
+    icp = (state.get('icps') or {}).get(cid)
+    spent = hist[-1][cid]['spent_total']; left = c['budget'] - spent
+    logs = [l for l in res['logs'].get(cid, [])]
+    ev = ('<div class="wide"><div class="ct">события ваших кварталов</div>' + ''.join(f'<div class="ev">{E(l)}</div>' for l in logs) + '</div>') if logs else ''
+    kp = f'''<div class="kpis">
+<div class="kpi"><div class="k">ваших пользователей</div><div class="v">{k_(us[-1])}</div><div class="d"><b>{(us[-1]-su)/su*100:+.0f}%</b> к старту, было {k_(su)}</div>{spark(us)}</div>
+<div class="kpi"><div class="k">ваша доля пользователей рынка</div><div class="v">{shN:.0f}%</div><div class="d">на старте <b>{sh0:.0f}%</b>, черта на шкале</div>{meter(shN/100*2 if shN < 50 else shN/100, sh0/100*2 if shN < 50 else sh0/100)}<div class="d" style="font-size:15px">шкала до {"50" if shN < 50 else "100"}%</div></div>
+<div class="kpi"><div class="k">бюджет потрачен</div><div class="v">{k_(spent)}</div><div class="d">из {k_(c["budget"])}, осталось <b>{k_(left)}</b> на квартал 3</div>{meter(spent / c["budget"])}</div>
+</div>'''
+    body = f'''<h1>{E(c["name"])}<span>ваши результаты после двух кварталов</span></h1>
+<div class="sub">Только для команды {E(c["name"])}. Не пересылайте другим командам. Пользователи: бесплатные и платящие вместе</div>
+{kp}
+<div class="two"><div class="wide"><div class="ct">ваши пользователи по кварталам</div><div class="cs">Серый столбец: старт игры</div>{quarter_cols(us, ['старт', 'квартал 1', 'квартал 2'], 'Ваши пользователи по кварталам')}</div>
+<div class="wide"><div class="ct">как изменились ваши сегменты</div><div class="cs">Прирост или спад пользователей за 2 квартала</div>{share_bars({s: sN[s]-s0[s] for s in SEG_ORDER})}</div></div>
+<div class="wide"><div class="ct">ваши пользователи по сегментам</div><div class="cs">Где вы выросли и где просели</div>{key2()}{seg_rows(s0, sN, max(max(sN.values()), max(s0.values())), icp=icp)}</div>{ev}'''
+    return page2(f'Симуляция 1 · {c["name"]}', body, f'только для команды {c["name"]}')
 
 if __name__ == '__main__':
     view, state_path, out = sys.argv[1], sys.argv[2], sys.argv[3]

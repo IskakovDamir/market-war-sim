@@ -18,6 +18,11 @@ def money(s):
     if u in ('k', 'к') or u.startswith('тыс'): v *= 1000
     elif u in ('m', 'м', 'млн'): v *= 1e6
     return round(v)
+def plan_price(s):
+    """Monthly plan price: the first number in the cell, units ignored ("$30 (годовой план $24)" -> 30).
+    No number at all ("по запросу", "контракт по количеству пользователей") -> None, not a free plan."""
+    m = re.search(r'(\d+(?:[.,]\d+)?)', clean(s).replace(' ', ''))
+    return round(float(m.group(1).replace(',', '.'))) if m else None
 def tables(block):
     out, cur = [], []
     for line in block.split('\n'):
@@ -48,7 +53,7 @@ def extract(md, n):
                     if pat in q: key = k; break
                 if key: r[key] = a
         elif head[:2] == ['Тариф', 'Цена в месяц']:
-            r['plans'] = [dict(name=row[0], price=(0 if re.search(r'беспл|free|^\$?0$', row[1].lower()) else money(row[1])), what=row[2] if len(row) > 2 else '') for row in body if row[0] or row[1]]
+            r['plans'] = [dict(name=row[0], price=(0 if re.search(r'беспл|free|^\$?0$', row[1].lower()) else plan_price(row[1])), what=row[2] if len(row) > 2 else '') for row in body if row[0] or row[1]]
         elif head[0] == 'Канал':
             sp = {}
             for row in body:
@@ -56,6 +61,8 @@ def extract(md, n):
             r['spend'] = sp
         elif head[0] == 'Карточка':
             r['actions'] = [dict(card=row[0], params=row[1] if len(row) > 1 else '', cost=row[2] if len(row) > 2 else '') for row in body if row[0]]
+        elif head[0] == 'Компания' and len(head) > 1 and 'Пользователей' in head[1]:   # checkpoint 2 forecast
+            r['predict'] = {row[0]: money(row[1]) for row in body if len(row) > 1 and money(row[1]) > 0}
         elif head[0] == 'Показатель':
             r['econ'] = {row[0][:30]: row[1] for row in body if len(row) > 1 and row[1]}
     return r

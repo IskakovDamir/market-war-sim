@@ -3,7 +3,7 @@ import os
 import pytest
 
 from conftest import SAMPLES
-from extract import extract, money
+from extract import extract, money, plan_price
 
 FILLED = open(os.path.join(SAMPLES, 'team_doc_filled_rork.md'), encoding='utf-8').read()
 TEMPLATE = open(os.path.join(SAMPLES, 'team_doc_template.md'), encoding='utf-8').read()
@@ -88,3 +88,30 @@ def test_extract_free_plan_words():
     assert extract(doc, 1)['plans'][0]['price'] == 0
     doc = FILLED.replace('| Free | бесплатно | 5 сборок |', '| Starter | free | 5 сборок |')
     assert extract(doc, 1)['plans'][0]['price'] == 0
+
+
+@pytest.mark.parametrize('text,value', [
+    ('$30', 30),
+    ('\\$59 (годовой план — \\$590 за год)', 59),
+    ('$30 (годовой план $24)', 30),
+    ('40$', 40),
+    ('$3.99', 4),
+    ('Эксклюзивный контракт по количеству пользователей', None),
+    ('по запросу', None),
+])
+def test_plan_price_takes_the_first_number_and_none_without_one(text, value):
+    assert plan_price(text) == value
+
+
+def test_extract_reads_plans_with_no_price_and_the_forecast_table():
+    md = '\n'.join([
+        '# **Чекпоинт 2. Ответ конкурентам**', '**Наша компания:** v0', '',
+        '| Тариф | Цена в месяц | Что входит |', '| :---- | :---- | :---- |',
+        '| Free | \\$0 | пробный проект |', '| Pro | \\$30 (годовой \\$24) | автор |',
+        '| Enterprise | Эксклюзивный контракт | от 10 человек |', '',
+        '| Компания | Пользователей после симуляции 1 |', '| :---- | :---- |',
+        '| Lovable | ≈ 70,000 |', '| Base44 | ≈ 17,500 |', '| Rork | 8 |', '| Bolt | — |', '',
+        '# **END**'])
+    r = extract(md, 2)
+    assert [(p['name'], p['price']) for p in r['plans']] == [('Free', 0), ('Pro', 30), ('Enterprise', None)]
+    assert r['predict'] == {'Lovable': 70000, 'Base44': 17500, 'Rork': 8}

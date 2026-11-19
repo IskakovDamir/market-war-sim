@@ -354,6 +354,7 @@ def run(moves, seed=7, upto=None):
                              spend=q_spend[cid], cac=q_spend[cid] / npaid if npaid > 1 else None,
                              ai_cost=ai_cost, score=dict(score[cid]), spent_total=st[cid]['spent'],
                              budget_left=CO[cid]['budget'] - st[cid]['spent'],
+                             seg_users={s: st[cid]['paid'][s] + st[cid]['free'][s] for s in SEG_IDS},
                              seg_paid=dict(st[cid]['paid']), seg_arpu=dict(st[cid]['arpu']),
                              arrivals={s: arrivals[cid][s] + sales_arr[cid][s] for s in SEG_IDS})
         hist.append(snap)
