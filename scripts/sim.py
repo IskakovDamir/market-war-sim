@@ -50,11 +50,15 @@ def run(moves, seed=7, upto=None):
                            arpu={s: float(c['price']) for s in SEG_IDS})
     start_mrr = {c['id']: sum(c['paid'].values()) * c['price'] for c in COMPANIES}
     hist = []
+    warnings = []
     excl_by_seg = {}  # seg -> owner for exclusive partner
     prev_moves = {}
     for qi, qmoves in enumerate(Q):
         q = qi + 1
         qmoves = dict(qmoves)
+        for cid in [c for c in qmoves if c not in CO]:   # unknown company id: skip, do not crash
+            warnings.append(f"Q{q}: неизвестная компания «{cid}» пропущена")
+            del qmoves[cid]
         for c in COMPANIES:   # a team that did not submit keeps its offer and spends nothing
             cid = c['id']
             if cid not in qmoves:
@@ -303,7 +307,7 @@ def run(moves, seed=7, upto=None):
                              arrivals={s: arrivals[cid][s] + sales_arr[cid][s] for s in SEG_IDS})
         hist.append(snap)
     return dict(hist=hist, start_mrr=start_mrr, logs={c: st[c]['log'] for c in st},
-                owners={c: st[c]['owner'] for c in st})
+                owners={c: st[c]['owner'] for c in st}, warnings=warnings)
 
 def final_scores(res, icps):
     """icps: company -> chosen ICP seg at checkpoint 1 (for the newcomer)"""

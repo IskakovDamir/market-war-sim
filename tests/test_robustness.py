@@ -60,7 +60,6 @@ def test_card_with_missing_fields_skipped():
     assert sum('пропущена' in l for l in res['logs']['bolt']) == 5
 
 
-@pytest.mark.xfail(strict=True, reason='B14: unknown company id crashes the run')
 def test_unknown_company_skipped():
     q = quarter()
     q['acme'] = move('rork')
