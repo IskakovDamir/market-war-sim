@@ -184,3 +184,33 @@ Golden impact measured before fixing: only B12 touches the golden game. With the
 | G6 | sim.py:338-340 | efficiency is normalized to the best team, so one outlier with tiny spend (not zero) still compresses everyone else. B17 fixes only the zero spend case. Measured in reference/calibration.md. |
 | G7 | extract.py:3-4 | channel names and ids are duplicated from spec.py; a rename in spec.py silently breaks parsing. Guarded by a test from step 3. |
 | G8 | dashboard.py:21, live.py:11, gen_doc.py:133 | all paths are relative to the script directory: state, output and the logo live next to the code. Fixed by the restructure in step 2. |
+
+## 5. Fix status
+
+Every bug had a failing test (strict xfail, or the visual check for B19 and B21) before its fix. Each fix commit removes the marker and keeps the whole suite green.
+
+| ID | Fixed in | Golden game impact |
+| --- | --- | --- |
+| B1 | 597846c | none |
+| B2 | 81c0b74 | none |
+| B3 | 1304c80 | none |
+| B4 | 1304c80 | none |
+| B5 | a3dd6e6 | none |
+| B6 | f33d968 | none (Bolt and Base44 Q3 overspend scaling unchanged: 88% and 80%) |
+| B7 | 639f2a4 | none |
+| B8 | 96346fd | none |
+| B9 | 1e43266 | none |
+| B10 | ce515be | none |
+| B11 | b472c7f | none |
+| B12 | 934311d | final Lovable 85.489 -> 85.571, v0 74.450 -> 74.455; inside the 0.1 tolerance |
+| B13 | 3af74c1 | none |
+| B14 | 9f5df18 | none |
+| B15 | 0aa48b1 | none |
+| B16 | 992e2fc | none |
+| B17 | b071cd7 | none |
+| B18 | a00666e | none |
+| B19 | b8a26f7 | none (desktop rendering unchanged) |
+| B20 | 1304c80 | none |
+| B21 | 6fb5bda | none |
+
+Open issues are G1 to G8 above plus the calibration findings in reference/calibration.md.
