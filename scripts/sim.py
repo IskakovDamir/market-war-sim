@@ -92,7 +92,7 @@ def run(moves, seed=7, upto=None):
         # ---------- resolve deals (M&A) ----------
         for cid, mv in qmoves.items():
             for a in mv.get('actions', []):
-                if a['id'] == 'mna':
+                if a['id'] == 'mna' and 'buyer' not in a:   # the seller's card only marks consent
                     t = a['target']
                     tm = qmoves.get(t, {})
                     agreed = any(x['id'] == 'mna' and x.get('buyer') == cid for x in tm.get('actions', []))

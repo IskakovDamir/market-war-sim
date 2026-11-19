@@ -4,7 +4,6 @@ from conftest import CIDS, CO, quarter, run
 import sim
 import dashboard
 
-B5 = pytest.mark.xfail(strict=True, reason='B5: seller side M&A action crashes the run')
 BUY = lambda price=500000: [{'id': 'mna', 'target': 'rork', 'price': price}]
 SELL = [{'id': 'mna', 'buyer': 'lovable'}]
 
@@ -13,21 +12,18 @@ def deal(price=500000, seller=True):
     return quarter(lovable=dict(actions=BUY(price)), rork=dict(actions=SELL if seller else []))
 
 
-@B5
 def test_seller_side_action_does_not_crash():
     res = run(deal())
     assert res['owners']['rork'] == 'lovable'
     assert 'Q1: купили Rork за $500,000' in res['logs']['lovable']
 
 
-@B5
 def test_mna_price_leaves_the_buyer_budget():
     res = run(deal(), quarter())
     assert res['hist'][0]['lovable']['spent_total'] == 500000
     assert res['hist'][1]['lovable']['budget_left'] == 500000
 
 
-@B5
 def test_mna_users_and_revenue_move_to_the_buyer_group_without_double_counting():
     res = run(deal(), quarter(), quarter())
     fs = sim.final_scores(res, {'rork': 'fnd'})
@@ -54,7 +50,6 @@ def test_mna_needs_both_sides():
     assert any('не засчитана' in l for l in res['logs']['lovable'])
 
 
-@B5
 def test_mna_below_three_quarterly_revenues_is_rejected():
     minimum = 3 * 3 * sum(CO['rork']['paid'].values()) * CO['rork']['price']
     assert minimum == 180000
