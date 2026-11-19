@@ -72,7 +72,6 @@ def test_efficiency_is_revenue_gain_per_dollar():
     assert fs['eff_score']['lovable'] == 0
 
 
-@pytest.mark.xfail(strict=True, reason='B17: a $0 spender gets efficiency per $1 and zeroes everyone else')
 def test_zero_spend_does_not_zero_others():
     m = dict(START)
     m['bolt'] = 150000
@@ -80,3 +79,12 @@ def test_zero_spend_does_not_zero_others():
     fs = sim.final_scores(result(m, spent=dict(bolt=50000, rork=0)), {})
     assert fs['eff_score']['bolt'] == 100
     assert fs['eff_score']['rork'] == 0
+
+
+def test_zero_spend_team_in_the_golden_game_leaves_other_scores_alone():
+    g = golden()
+    for q in g['quarters']:
+        q['rork'] = dict(q['rork'], spend={}, actions=[])
+    fs = sim.final_scores(sim.run(g), {'rork': 'fnd'})
+    assert fs['eff_score']['rork'] == 0
+    assert max(fs['eff_score'][c] for c in CIDS if c != 'rork') == pytest.approx(100)

@@ -183,7 +183,7 @@ Companies are grouped by owner. Market total MRR counts every company once.
 | Rork | `100 x share of ICP segment revenue / 0.20`, capped 100; ICP from checkpoint 1 (`state.icps`, default `fnd`) |
 
 ```
-efficiency = (sum over quarters of 3 x MRR  -  3 x start MRR x quarters) / max(1, spent)
+efficiency = (sum over quarters of 3 x MRR  -  3 x start MRR x quarters) / spent     (0 when spent is 0)
 eff score  = 100 x efficiency / best efficiency, floor 0
 final      = 0.7 x goal + 0.3 x eff score
 ```

@@ -392,7 +392,7 @@ def final_scores(res, icps):
         rev3 = sum(sum(h[c]['mrr'] for c in grp[o]) for h in res['hist']) * 3
         base3 = sum(start[c] for c in grp[o]) * 3 * len(res['hist'])
         spent = sum(res['hist'][-1][c]['spent_total'] for c in grp[o])
-        eff[o] = (rev3 - base3) / max(1, spent)
+        eff[o] = (rev3 - base3) / spent if spent > 0 else 0.0   # no money spent: no efficiency to measure
     mx = max(eff.values())
     effs = {o: max(0, 100 * eff[o] / mx) if mx > 0 else 0 for o in eff}
     final = {o: 0.7 * goals[o] + 0.3 * effs[o] for o in grp}
