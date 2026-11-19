@@ -18,6 +18,10 @@ Live state is `$MW/live/state.json` and the default dashboard file is `$MW/live/
    ```bash
    python3 $MW/scripts/gen_doc.py
    ```
+   Or one doc per checkpoint plus the rules and the reference, as used on 19 Nov 2026 (`out/docs/*.html`):
+   ```bash
+   python3 $MW/scripts/gen_docs.py
+   ```
 3. Decide which team plays which company: Lovable (leader), Bolt (challenger), v0 and Base44 (niche), Rork (newcomer).
 
 ## Before checkpoint 1
@@ -32,6 +36,7 @@ Open `$MW/live/index.html` on the projector: the pre-game screen shows each comp
 
 1. Each team sends its doc link with "[Компания], чекпоинт 1 готов".
 2. Export each doc: File, Download, Markdown (.md). Save as `$MW/live/docs/cp1/<company>.md`. The company is read from "Наша компания:" and falls back to the file name.
+   A doc that arrives as .docx: `$MW/.venv/bin/python $MW/tools/docx2md.py <file.docx> > $MW/live/docs/cp1/<company>.md`.
 3. Ingest:
    ```bash
    python3 $MW/scripts/live.py ingest 1 $MW/live/docs/cp1/*.md
@@ -52,7 +57,7 @@ Open `$MW/live/index.html` on the projector: the pre-game screen shows each comp
 1. Export to `$MW/live/docs/cp2/`, then `live.py ingest 2 ...`.
 2. Write `moves_cp2.json`. Score consistency against checkpoint 1. Team deals and M&A count only when both docs say the same thing; check both.
 3. `live.py moves 2 $MW/live/moves_cp2.json`, then `live.py render public2`.
-4. Predictions: every team writes how many users each rival will have after two quarters. Store them (team id -> company id -> users):
+4. Predictions: every team writes how many users each rival will have after two quarters. `ingest 2` reads the forecast table into `predictions` (numbers below 1000 are read as thousands). Check the printout; to correct one, store them by hand (team id -> company id -> users):
    ```bash
    python3 - <<'EOF'
    import json, os
@@ -67,6 +72,11 @@ Open `$MW/live/index.html` on the projector: the pre-game screen shows each comp
    python3 $MW/scripts/live.py render sim1
    ```
    The table marks the most accurate team with "+5 баллов". Write it into `s['bonus'] = {'<team>': 5}` with the same snippet; the final view adds it.
+   To show the market to the room and send each team only its own numbers:
+   ```bash
+   python3 $MW/scripts/live.py sim1split                  # out/sim1/market.html + out/sim1/<company>.html
+   $MW/.venv/bin/python $MW/tools/shots.py $MW/out/sim1    # optional PNGs to send in Telegram
+   ```
 
 ## Checkpoint 3
 

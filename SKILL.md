@@ -16,9 +16,12 @@ python3 $MW/scripts/live.py reset
 python3 $MW/scripts/live.py ingest <cp> <doc.md ...>      # parse team docs for checkpoint 1, 2 or 3
 python3 $MW/scripts/live.py moves <cp> <moves.json>       # store moves for that quarter
 python3 $MW/scripts/live.py render <view> [out.html]      # wait | public1 | public2 | public3 | sim1 | final
+python3 $MW/scripts/live.py sim1split [outdir]           # simulation 1: market.html for the room + one private page per team
 ```
 
 State lives in `$MW/live/state.json` (override with `MARKET_WAR_LIVE=<dir>`); the default page is `$MW/live/index.html`.
+
+Ingest cleans what teams write: money written in thousands ("50" for $50k) when every value is below 1000, field labels and wrapping quotes, plan prices without a number ("по запросу") kept off the sim, and an empty public field keeps the previous checkpoint's answer. The checkpoint 2 forecast table goes to `predictions`. A state with `"arpu_reset": true` replays the live game of 19 Nov 2026 on its pre-B12 ARPU rule.
 
 ## What Claude does at each checkpoint
 
@@ -40,12 +43,15 @@ Show the host the scores you gave, with one line of reasoning per team, before r
 | Path | What |
 | --- | --- |
 | scripts/spec.py | market data: segments, companies, channels, cards, AI cost (balance constants) |
-| scripts/sim.py | `run(moves, seed=7, upto=None)`, `final_scores(res, icps)` |
-| scripts/extract.py | `extract(md, checkpoint)`, `money(text)` |
-| scripts/dashboard.py | `view_wait`, `view_public`, `view_sim1`, `view_final` |
+| scripts/sim.py | `run(moves, seed=7, upto=None, arpu_reset=False)`, `final_scores(res, icps)` |
+| scripts/extract.py | `extract(md, checkpoint)`, `money(text)`, `plan_price(text)` |
+| scripts/dashboard.py | `view_wait`, `view_public`, `view_sim1`, `view_sim1_market`, `view_sim1_team`, `view_final` |
 | scripts/live.py | game-day CLI |
 | scripts/report.py | `report.py <full game moves.json>`: prints every quarter, goals and logs |
 | scripts/gen_doc.py | builds the team doc template into `out/team_doc.html` |
+| scripts/gen_docs.py | builds the five game-day docs into `out/docs/`: rules, checkpoint 1-3 templates, reference |
+| tools/docx2md.py | team doc saved as .docx -> the markdown `ingest` reads (needs python-docx) |
+| tools/shots.py | screenshots every .html in a folder, e.g. the `sim1split` pages |
 | references/rules.md | every formula and constant |
 | references/moves-schema.md | moves JSON schema and examples |
 | references/scoring-rubric.md | how to score 1..10 per segment and consistency |

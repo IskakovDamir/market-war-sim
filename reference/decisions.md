@@ -23,6 +23,10 @@ Choices made without asking, in the order they were made.
 | D17 | 4 | Visual thresholds: text boxes are compared after trimming 20% top and bottom (line box padding is not ink); chart marks except light grid lines must not cover text; on the phone text must be at least 12px (the brief sets only the 14px desktop rule). | Avoids false overlaps between stacked headline lines, catches the real B21 defect, keeps phone text legible. |
 | D18 | 5 | Calibration adds a "minimal" probe ($5k once) next to the four requested strategies. | It exposes the remaining efficiency outlier (G6) with numbers. |
 | D19 | 6 | `check_all.py` creates `.venv` and installs Chromium on first run (needs network once), requires at least 40 passed and 0 failed tests, and compares the golden game with tolerance 0.1. | A fresh clone must pass with one command. |
+| D20 | 7 | Live game of 19 Nov 2026 ported back: it ran on the original sources plus live fixes, i.e. before B3-B17. Replayed on this repo from its state after checkpoint 2, 48 of 50 numbers matched; Q2 MRR of Lovable (455,537 vs 439,677) and Bolt (177,295 vs 176,036) moved, all from B12. `sim.run(arpu_reset=True)` restores the old rule (ARPU drops to the plan price whenever it is above it) and the game's state carries `"arpu_reset": true`, so its final runs on the rule its first two quarters ran on. Default stays B12. | Numbers already computed in the room must not change; new games keep the fix. No balance constant moved. |
+| D21 | 7 | A plan price with no number ("Эксклюзивный контракт...", "по запросу") is `None`: shown as "по запросу", left out of the sim's plans. | Live, `plan_price` gave 0 and turned v0's Enterprise into a free plan until the state was fixed by hand. |
+| D22 | 7 | Ingest scales spend and forecasts by 1000 only when every value is below 1000. After B1 `money()` reads "17,500" as 17500; the live game read it as 17.5 -> 18 -> 18000. The state keeps 18000 (what the forecast table showed); a re-ingest of that doc gives 17500. The +5 winner (v0) is the same either way. | Mixed rows ("50" and "50,000") are left as written rather than guessed. |
+| D23 | 7 | `docx2md.py` and `shots.py` live in `tools/`, not `scripts/`: they need python-docx and Playwright, and `scripts/` stays stdlib only (tested). | The skill's runtime has no dependencies. |
 
 ## Changes to public interface and UI text
 
@@ -37,3 +41,5 @@ Everything else (balance constants in spec.py, CLI commands and arguments, moves
 | Empty CAC placeholder U+2013 (en dash) became `-` | B18, no em or en dashes in UI |
 | `money()` parsing: thousands commas, units only right after the number | B1, B2 (labels untouched) |
 | Golden final Lovable 85.489 -> 85.571 (prints 85.6), v0 74.450 -> 74.455 | B12, inside the 0.1 tolerance |
+| `live.py sim1split [outdir]`; `dashboard.view_sim1_market`, `view_sim1_team`; snapshots have `seg_users`; `sim.run(..., arpu_reset=False)`; state key `arpu_reset`; `extract.plan_price`; extract result key `predict` | Ported from the live game of 19 Nov 2026 (D20-D22); existing commands and fields unchanged |
+| New UI text from the live game: "по запросу" for a plan without a price, the simulation 1 market and team pages | Shown in the room on 19 Nov 2026 |

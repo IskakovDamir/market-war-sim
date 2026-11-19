@@ -8,13 +8,13 @@ Runtime: Python 3, standard library only. Dev tools (pytest, Playwright) live in
 
 ```
 SKILL.md                skill entry point (name: market-war)
-scripts/                spec.py, sim.py, extract.py, dashboard.py, live.py, report.py, gen_doc.py
+scripts/                spec.py, sim.py, extract.py, dashboard.py, live.py, report.py, gen_doc.py, gen_docs.py
 assets/                 nf_logo_b64.txt (inlined into dashboards), nf_logo_160.png
 samples/                test_moves.json (full game), moves_cp1-3.json, team doc template and a filled doc
 references/             rules.md, moves-schema.md, scoring-rubric.md, game-day.md (read by Claude during a game)
 reference/              discovery.md, decisions.md, calibration.md, proof/ screenshots (engineering record)
 tests/                  pytest suite
-tools/                  check_all.py, visual_check.py, calibrate.py
+tools/                  check_all.py, visual_check.py, calibrate.py, docx2md.py, shots.py
 live/                   game state and rendered pages (gitignored)
 out/                    generated team doc template (gitignored)
 ```
