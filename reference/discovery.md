@@ -126,6 +126,7 @@ Every row was run before writing it here; "Got" is the measured output. Commands
 | B17 | sim.py:338 | efficiency divides by max(1, spent): a team that spends $0 but gains revenue (switching inflow) gets efficiency per $1 and zeroes every other team's efficiency | golden with Rork at zero spend: eff_score Rork 100, all others 0; Lovable final 85.5 -> 70.0 | zero spend -> efficiency 0, others unaffected | test_goals.py::test_zero_spend_does_not_zero_others |
 | B18 | dashboard.py:178 | UI uses an en dash as the empty CAC placeholder (UI text rule: no em or en dashes) | U+2013 en dash | ASCII placeholder | test_dashboard.py::test_no_em_or_en_dash |
 | B19 | dashboard.py CSS | suspected: fixed 3 column grid, 64px heading and wide tables at 390px phone width overflow | measured in step 4 by tools/visual_check.py | no overflow | tools/visual_check.py |
+| B20 | sim.py:258, 98, 114, 94 | found while writing tests in step 3: a known card with a missing field (attack or copy without `target`/`seg`, exclusive without `seg`, team_deal without `partner`, mna without `target`) crashes the run | KeyError: 'target' | skipped with a log line | test_robustness.py::test_card_with_missing_fields_skipped |
 
 Reproduction commands (repo root, commit `890a721`):
 
@@ -158,6 +159,7 @@ python3 -c "
 import sim; f=lambda a: sim.run({'quarters':[{'v0':{'actions':[a]}}]})['hist'][0]['v0']['paid']
 print(f({'id':'onboarding'}), f({'id':'custom','cost':30000,'as':'onboarding'}))"   # B13
 python3 -c "import sim; sim.run({'quarters':[{'acme':{}}]})"   # B14
+python3 -c "import sim; sim.run({'quarters':[{'bolt':{'actions':[{'id':'attack','seg':'fnd'}]}}]})"   # B20
 python3 live.py reset && for i in 1 2 3; do python3 live.py moves $i samples/moves_cp$i.json; done && python3 live.py render wait /tmp/w.html && grep -o '<title>[^<]*</title>' /tmp/w.html | head -1   # B15
 python3 live.py reset && python3 live.py render public2 /tmp/p2.html   # B16
 python3 -c "
