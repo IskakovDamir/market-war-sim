@@ -121,7 +121,7 @@ users[s]  = alloc[s] / cost[s] x (1 + var x u), split over quarters by the delay
 ```
 Community spend sets a churn bonus of 0.2 for this and next quarter. Events spend gives +0.5 score in the ICP next quarter. Sales users go to a separate sales pool.
 
-Viral card: users = 15000 or 2000, spread over segments by `size / (lo + hi)` of the shorts channel, land this quarter. Referral card: `invites = (paid + free) x 0.06 x avg(score) / 6`, spread by the company's current user mix, `$10 x invites` added to spent.
+Viral card: users = 15000 or 2000, spread over segments by `size / (lo + hi)` of the shorts channel, land this quarter. Referral card: `invites = (paid + free) x 0.06 x avg(score) / 6`, spread by the company's current user mix, `$10 x invites` added to spent. If the budget left cannot pay for every invite, invites are cut to `budget left / 10`.
 
 ### 7. Arrivals
 ```

@@ -72,7 +72,10 @@ def test_cards_that_fit_are_played_in_order_and_channels_get_the_rest():
     assert 'Q2: перерасход, траты на каналы урезаны до 33%' in res['logs']['rork']
 
 
-@pytest.mark.xfail(strict=True, reason='B7: referral $10 per invite is charged after the budget check')
 def test_referral_cannot_exceed_budget():
     res = run(quarter(bolt=dict(spend={'social': 580000}, actions=[{'id': 'referral'}])))
-    assert res['hist'][-1]['bolt']['spent_total'] <= 600000
+    assert res['hist'][-1]['bolt']['spent_total'] == pytest.approx(600000)
+    assert any('рефералка урезана' in l for l in res['logs']['bolt'])
+    full = run(quarter(bolt=dict(actions=[{'id': 'referral'}])))
+    invites = (4000 + 30000) * 0.06 * (sum(full['hist'][0]['bolt']['score'].values()) / 5 / 6)
+    assert full['hist'][0]['bolt']['spent_total'] == pytest.approx(20000 + 10 * invites)

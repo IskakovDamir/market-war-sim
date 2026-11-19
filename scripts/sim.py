@@ -246,6 +246,10 @@ def run(moves, seed=7, upto=None):
                     active = sum(st[cid]['paid'].values()) + sum(st[cid]['free'].values())
                     avg_sc = sum(score[cid].values()) / 5
                     ref = active * 0.06 * (avg_sc / 6)
+                    can_pay = max(0.0, group_left(st, st[cid]['owner'])) / 10   # $10 per invite, never past the budget
+                    if ref > can_pay:
+                        ref = can_pay
+                        st[cid]['log'].append(f"Q{q}: рефералка урезана: бюджета хватает на {ref:,.0f} приглашений")
                     st[cid]['spent'] += ref * 10; q_spend[cid] += ref * 10
                     mix = {s: st[cid]['paid'][s] + st[cid]['free'][s] for s in SEG_IDS}; mt = sum(mix.values()) or 1
                     for s in SEG_IDS: st[cid]['pending'][q - 1][s] += ref * mix[s] / mt
