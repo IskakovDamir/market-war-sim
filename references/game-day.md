@@ -24,8 +24,9 @@ Live state is `$MW/live/state.json` and the default dashboard file is `$MW/live/
 
 ```bash
 python3 $MW/scripts/live.py reset
+python3 $MW/scripts/live.py render wait
 ```
-Open `$MW/live/index.html` on the projector after each render; refresh the tab after each new render.
+Open `$MW/live/index.html` on the projector: the pre-game screen shows each company's budget, starting revenue and goal. Refresh the tab after each new render. A mistyped view name stops with `!! неизвестный экран` and writes nothing, so the final screen never shows by accident.
 
 ## Checkpoint 1
 

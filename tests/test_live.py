@@ -79,7 +79,6 @@ def test_icp_is_fixed_at_checkpoint_1_only(tmp_path):
     assert state(tmp_path)['quarters'][1]['rork']['plans'] == [{'name': 'Pro', 'price': 25}]
 
 
-@pytest.mark.xfail(strict=True, reason='B15: unknown view names render the final view')
 def test_render_wait_and_unknown_view(tmp_path):
     cli(tmp_path, 'reset')
     cli(tmp_path, 'render', 'wait', tmp_path / 'w.html')
@@ -87,6 +86,9 @@ def test_render_wait_and_unknown_view(tmp_path):
     bad = cli(tmp_path, 'render', 'finall', tmp_path / 'x.html', check=False)
     assert bad.returncode != 0
     assert not (tmp_path / 'x.html').exists()
+    assert 'неизвестный экран' in bad.stderr
+    empty = cli(tmp_path, 'render', 'final', tmp_path / 'f.html', check=False)
+    assert empty.returncode != 0 and 'нет ходов' in empty.stderr
 
 
 @pytest.mark.xfail(strict=True, reason='B16: public view of a checkpoint nobody submitted crashes')

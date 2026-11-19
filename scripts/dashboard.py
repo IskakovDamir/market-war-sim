@@ -188,21 +188,24 @@ def view_final(state, res, fs):
 {ranking}<div class="wide"><div class="lbl" style="margin-top:0">выручка в месяц по кварталам</div>{mrr_svg(res)}</div>{table}<div class="grid">{"".join(qc)}</div>'''
     return page('Итоги рынка', body, 'финал')
 
-if __name__ == '__main__':
-    view, state_path, out = sys.argv[1], sys.argv[2], sys.argv[3]
-    state = json.load(open(state_path, encoding='utf-8'))
-    if view.startswith('public'):
-        html_ = view_public(state, int(view[-1]))
-    else:
-        moves = {'quarters': state['quarters']}
-        if view == 'sim1':
-            res = sim.run(moves, seed=state.get('seed', 7), upto=2); html_ = view_sim1(state, res)
-        else:
-            res = sim.run(moves, seed=state.get('seed', 7)); fs = sim.final_scores(res, state.get('icps', {})); html_ = view_final(state, res, fs)
-    open(out, 'w', encoding='utf-8').write(html_)
-    print('ok', out, len(html_))
-
 def view_wait():
     cards = ''.join(f'<div class="card">{head(c)}</div><div class="lbl">бюджет на игру</div><div class="pv">{money(CO[c]["budget"])}</div><div class="lbl">выручка в месяц на старте</div><div class="pv">{money(sum(CO[c]["paid"].values())*CO[c]["price"])}</div><div class="lbl">цель роли</div><div class="ad">{E(CO[c]["goal"])}</div></div>' for c in ORDER)
     body = f'<h1>дашборд рынка<span>до старта игры</span></h1><div class="sub">После чекпоинта 1 здесь появятся открытые части ходов всех компаний</div><div class="grid">{cards}</div>'
     return page('Рыночная война · дашборд', body, 'старт')
+
+if __name__ == '__main__':
+    view, state_path, out = sys.argv[1], sys.argv[2], sys.argv[3]
+    state = json.load(open(state_path, encoding='utf-8'))
+    moves = {'quarters': state.get('quarters', [])}
+    if view == 'wait':
+        html_ = view_wait()
+    elif view in ('public1', 'public2', 'public3'):
+        html_ = view_public(state, int(view[-1]))
+    elif view == 'sim1':
+        res = sim.run(moves, seed=state.get('seed', 7), upto=2); html_ = view_sim1(state, res)
+    elif view == 'final':
+        res = sim.run(moves, seed=state.get('seed', 7)); fs = sim.final_scores(res, state.get('icps', {})); html_ = view_final(state, res, fs)
+    else:
+        sys.exit(f'unknown view {view}: wait | public1 | public2 | public3 | sim1 | final')
+    open(out, 'w', encoding='utf-8').write(html_)
+    print('ok', out, len(html_))

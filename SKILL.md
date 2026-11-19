@@ -15,7 +15,7 @@ A deterministic market simulation (Python 3 stdlib, seed 7) plus a live CLI for 
 python3 $MW/scripts/live.py reset
 python3 $MW/scripts/live.py ingest <cp> <doc.md ...>      # parse team docs for checkpoint 1, 2 or 3
 python3 $MW/scripts/live.py moves <cp> <moves.json>       # store moves for that quarter
-python3 $MW/scripts/live.py render <view> [out.html]      # public1 | public2 | public3 | sim1 | final
+python3 $MW/scripts/live.py render <view> [out.html]      # wait | public1 | public2 | public3 | sim1 | final
 ```
 
 State lives in `$MW/live/state.json` (override with `MARKET_WAR_LIVE=<dir>`); the default page is `$MW/live/index.html`.

@@ -2,7 +2,7 @@ import os as _os; BASE = _os.path.dirname(_os.path.abspath(__file__))
 """Live game state manager.
 python3 live.py ingest <cp> <md files...>      -> extracts docs, stores raw + public, prints compact summary
 python3 live.py moves <cp> <moves.json>         -> stores sim moves for quarter cp (AI scores etc. from Claude)
-python3 live.py render <view> [out]              -> view: public1|public2|public3|sim1|final
+python3 live.py render <view> [out]              -> view: wait|public1|public2|public3|sim1|final
 """
 import sys, json, os, re
 sys.path.insert(0, BASE)
@@ -11,6 +11,7 @@ import dashboard, sim
 ROOT = os.path.dirname(BASE)
 LIVE = os.environ.get('MARKET_WAR_LIVE') or os.path.join(ROOT, 'live')
 ST = os.path.join(LIVE, 'state.json')
+VIEWS = ('wait', 'public1', 'public2', 'public3', 'sim1', 'final')
 def load():
     return json.load(open(ST, encoding='utf-8')) if os.path.exists(ST) else dict(public={}, raw={}, quarters=[], seed=7, icps={}, predictions={}, bonus={}, quotes={})
 def save(s): os.makedirs(os.path.dirname(ST), exist_ok=True); json.dump(s, open(ST, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
@@ -48,11 +49,16 @@ if __name__ == '__main__':
         save(s); print('ok', list(mv))
     elif cmd == 'render':
         view = sys.argv[2]; out = sys.argv[3] if len(sys.argv) > 3 else os.path.join(LIVE, 'index.html')
-        if view.startswith('public'): h = dashboard.view_public(s, int(view[-1]))
+        if view not in VIEWS:   # never fall through to the final view: it shows revenue to the room
+            sys.exit(f"!! неизвестный экран {view}: {' | '.join(VIEWS)}")
+        if view in ('sim1', 'final') and not s['quarters']:
+            sys.exit('!! нет ходов: сначала live.py moves <cp> <moves.json>')
+        if view == 'wait': h = dashboard.view_wait()
+        elif view.startswith('public'): h = dashboard.view_public(s, int(view[-1]))
         elif view == 'sim1':
             r = sim.run({'quarters': s['quarters']}, seed=s['seed'], upto=2); h = dashboard.view_sim1(s, r)
             for c, v in r['hist'][-1].items(): print(c, round(v['users']))
-        else:
+        else:   # final
             r = sim.run({'quarters': s['quarters']}, seed=s['seed']); fs = sim.final_scores(r, s['icps']); h = dashboard.view_final(s, r, fs)
             print({k: {c: round(v, 1) for c, v in fs[k].items()} for k in ('goals', 'final')})
         os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
