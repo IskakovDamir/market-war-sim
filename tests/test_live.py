@@ -91,7 +91,6 @@ def test_render_wait_and_unknown_view(tmp_path):
     assert empty.returncode != 0 and 'нет ходов' in empty.stderr
 
 
-@pytest.mark.xfail(strict=True, reason='B16: public view of a checkpoint nobody submitted crashes')
 def test_public_view_before_ingest(tmp_path):
     cli(tmp_path, 'reset')
     cli(tmp_path, 'render', 'public2', tmp_path / 'p.html')

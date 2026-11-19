@@ -68,8 +68,8 @@ def head(cid):
     return f'<div class="head"><div class="ini">{INIT[cid]}</div><div><div class="name">{E(c["name"])}</div><div class="pos">{E(c["pos"].lower())}</div></div>'
 
 def view_public(state, cp):
-    pub = state['public'][str(cp)]
-    prev = state['public'].get(str(cp - 1), {})
+    pub = state.get('public', {}).get(str(cp), {})   # nobody submitted yet: every card says so
+    prev = state.get('public', {}).get(str(cp - 1), {})
     cards = []
     for cid in ORDER:
         p = pub.get(cid)
