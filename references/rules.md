@@ -93,9 +93,9 @@ clamped to [1, 10]
 ### 4. Exclusive partner
 The first `{"id": "exclusive", "seg": S}` claim wins segment S for the rest of the game: partners cost x0.6 for the owner and x1.3 for everyone else in S.
 
-### 5. Budget
+### 5. Budget (checked right after M&A, before any card takes effect)
 ```
-cards  = sum of card prices this quarter (a second decoy is free and does nothing)
+cards  = card prices in the order written; a card that no longer fits is not played (log line); a second decoy is free and does nothing
 left   = sum of (budget - spent) over the owner group (a buyer and the companies it bought share one pool)
 if channels + cards > left:  every channel is scaled by k = max(0, (left - cards) / channels)
 spent += channels + cards

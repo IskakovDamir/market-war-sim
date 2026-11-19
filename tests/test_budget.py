@@ -51,12 +51,25 @@ def test_overspend_keeps_the_channel_mix():
     assert a['hist'][0]['rork']['arrivals'] == pytest.approx(b['hist'][0]['rork']['arrivals'])
 
 
-@pytest.mark.xfail(strict=True, reason='B6: card costs are charged after the budget is gone')
 def test_cards_cannot_exceed_budget():
     res = run(quarter(rork=dict(spend={'creators': 150000})),
               quarter(rork=dict(actions=[{'id': 'copy', 'target': 'v0', 'seg': 'des'}])))
     assert res['hist'][-1]['rork']['spent_total'] <= 150000
     assert_within_budget(res)
+    assert res['hist'][-1]['rork']['score']['des'] == 5.0  # the card was not played
+    assert 'Q2: не хватает бюджета на карточку «Скопировать фичу соперника», карточка не сыграна' in res['logs']['rork']
+
+
+def test_cards_that_fit_are_played_in_order_and_channels_get_the_rest():
+    acts = [{'id': 'onboarding'}, {'id': 'copy', 'target': 'v0', 'seg': 'des'}, {'id': 'decoy'}]
+    res = run(quarter(rork=dict(spend={'creators': 100000})),
+              quarter(rork=dict(spend={'creators': 30000}, actions=acts)))
+    q2 = res['hist'][1]['rork']
+    # 50k left: onboarding 30k fits, copy 60k does not, decoy 10k fits, channels get 10k of 30k
+    assert q2['spend'] == pytest.approx(50000)
+    assert q2['spent_total'] == pytest.approx(150000)
+    assert any('«Скопировать фичу соперника»' in l for l in res['logs']['rork'])
+    assert 'Q2: перерасход, траты на каналы урезаны до 33%' in res['logs']['rork']
 
 
 @pytest.mark.xfail(strict=True, reason='B7: referral $10 per invite is charged after the budget check')

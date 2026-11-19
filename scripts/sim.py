@@ -37,6 +37,7 @@ def chosen_price(plans, seg):
 def has_free(plans): return any(p['price'] == 0 for p in plans)
 
 CARDS = {a['id'] for a in ACTIONS}
+CARD_NAME = {a['id']: a['name'] for a in ACTIONS}
 CARD_FIELDS = dict(attack=('target', 'seg'), copy=('target', 'seg'), exclusive=('seg',), team_deal=('partner',))
 
 def card_ok(a):
@@ -115,6 +116,29 @@ def run(moves, seed=7, upto=None):
                         st[cid]['log'].append(f"Q{q}: сделка с {CO[t]['name']} не засчитана: цена ${a['price']:,.0f} больше остатка бюджета ${left:,.0f}")
                     else:
                         st[cid]['log'].append(f"Q{q}: сделка с {CO[t]['name']} не засчитана (нет согласия или цена ниже ${min_price:,.0f})")
+        # ---------- budget: cards that fit are played, channels are scaled to what is left ----------
+        q_spend = {}
+        for cid in list(qmoves):
+            mv = qmoves[cid]
+            spend = dict(mv.get('spend', {}))
+            budget_left = group_left(st, st[cid]['owner'])   # buyer and bought companies share one pool
+            act_cost, kept = 0, []
+            for a in mv.get('actions', []):
+                if a['id'] == 'custom': c = max(20000, a.get('cost', 20000))
+                elif a['id'] == 'decoy' and st[cid]['decoy']: c = 0
+                else: c = ACTION_COST.get(a['id'], 0)
+                if act_cost + c > budget_left + 1e-9:
+                    st[cid]['log'].append(f"Q{q}: не хватает бюджета на карточку «{CARD_NAME[a['id']]}», карточка не сыграна")
+                    continue
+                act_cost += c; kept.append(a)
+            total = sum(spend.values()) + act_cost
+            if total > budget_left and total > 0:
+                k = max(0.0, (budget_left - act_cost) / max(1, sum(spend.values())))
+                spend = {ch: v * k for ch, v in spend.items()}
+                st[cid]['log'].append(f"Q{q}: перерасход, траты на каналы урезаны до {k:.0%}")
+                total = sum(spend.values()) + act_cost
+            st[cid]['spent'] += total; q_spend[cid] = total
+            qmoves[cid] = dict(mv, spend=spend, actions=kept)
         # ---------- effective scores ----------
         score = {}
         for cid, mv in qmoves.items():
@@ -162,22 +186,8 @@ def run(moves, seed=7, upto=None):
         # ---------- acquisition ----------
         arrivals = {cid: {s: 0.0 for s in SEG_IDS} for cid in st}
         sales_arr = {cid: {s: 0.0 for s in SEG_IDS} for cid in st}
-        q_spend = {}
         for cid, mv in qmoves.items():
-            spend = dict(mv.get('spend', {}))
-            act_cost = 0
-            for a in mv.get('actions', []):
-                if a['id'] == 'custom': act_cost += max(20000, a.get('cost', 20000))
-                elif a['id'] == 'decoy' and st[cid]['decoy']: pass
-                else: act_cost += ACTION_COST.get(a['id'], 0)
-            total = sum(spend.values()) + act_cost
-            budget_left = group_left(st, st[cid]['owner'])   # buyer and bought companies share one pool
-            if total > budget_left and total > 0:
-                k = max(0.0, (budget_left - act_cost) / max(1, sum(spend.values())))
-                spend = {ch: v * k for ch, v in spend.items()}
-                st[cid]['log'].append(f"Q{q}: перерасход, траты на каналы урезаны до {k:.0%}")
-                total = sum(spend.values()) + act_cost
-            st[cid]['spent'] += total; q_spend[cid] = total
+            spend = dict(mv.get('spend', {}))   # already fitted to the budget above
             icp = mv.get('icp', 'fnd')
             cons = mv.get('consistency', 1)
             pen = 1.25 if cons == 0 else (1.10 if cons == 0.5 else 1.0)
