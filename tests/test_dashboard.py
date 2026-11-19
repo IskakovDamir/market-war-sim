@@ -80,7 +80,6 @@ def test_docs_and_skill_text_have_no_em_or_en_dash():
     assert bad == []
 
 
-@pytest.mark.xfail(strict=True, reason='B18: en dash used as the empty CAC placeholder')
 def test_no_em_or_en_dash_in_ui():
     s = game_state()
     for q in s['quarters']:

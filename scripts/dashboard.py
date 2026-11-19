@@ -176,7 +176,7 @@ def view_final(state, res, fs):
     for c in ORDER:
         h = last[c]
         spent = h['spent_total']; cac = [x[c]['cac'] for x in res['hist'] if x[c]['cac']]
-        det.append(f'<tr><td>{E(CO[c]["name"])}</td><td class="n">{fmt(h["users"])}</td><td class="n">{fmt(h["paid"])}</td><td class="n">{money(h["mrr"])}</td><td class="n">{h["mrr"]/tot*100:.0f}%</td><td class="n">{money(spent)}</td><td class="n">{"$"+fmt(sum(cac)/len(cac)) if cac else "–"}</td><td class="small">{E(CO[c]["goal"])}</td></tr>')
+        det.append(f'<tr><td>{E(CO[c]["name"])}</td><td class="n">{fmt(h["users"])}</td><td class="n">{fmt(h["paid"])}</td><td class="n">{money(h["mrr"])}</td><td class="n">{h["mrr"]/tot*100:.0f}%</td><td class="n">{money(spent)}</td><td class="n">{"$"+fmt(sum(cac)/len(cac)) if cac else "-"}</td><td class="small">{E(CO[c]["goal"])}</td></tr>')
     table = f'<div class="wide"><div class="lbl" style="margin-top:0">цифры после третьего квартала</div><table class="t"><tr><th>компания</th><th class="n">пользователи</th><th class="n">платящие</th><th class="n">выручка в месяц</th><th class="n">доля</th><th class="n">потрачено</th><th class="n">средний CAC</th><th>цель роли</th></tr>{"".join(det)}</table></div>'
     quotes = state.get('quotes', {})
     qc = []
