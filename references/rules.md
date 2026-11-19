@@ -91,7 +91,7 @@ clamped to [1, 10]
 ```
 
 ### 4. Exclusive partner
-The first `{"id": "exclusive", "seg": S}` claim wins segment S for the rest of the game: partners cost x0.6 for the owner and x1.3 for everyone else in S.
+The first `{"id": "exclusive", "seg": S}` claim wins segment S for the rest of the game. From the next quarter on, partners cost x0.6 for the owner and x1.3 for everyone else in S; partners money spent in the quarter the card is played is priced as usual.
 
 ### 5. Budget (checked right after M&A, before any card takes effect)
 ```
@@ -116,7 +116,7 @@ cost[s]   = hi - (hi - lo) x (score[s] - 1) / 9
           / (1 + 0.2 x (quarter - 1))                                           geo
           x 0.7                                                                 community, Lovable
           x 0.6                                                                 partners, v0 in des and dev, Base44 in smb
-          x 0.6 owner / x 1.3 others                                            partners in an exclusive segment
+          x 0.6 owner / x 1.3 others                                            partners in an exclusive segment, from the quarter after the card
 users[s]  = alloc[s] / cost[s] x (1 + var x u), split over quarters by the delay fractions
 ```
 Community spend sets a churn bonus of 0.2 for this and next quarter. Events spend gives +0.5 score in the ICP next quarter. Sales users go to a separate sales pool.

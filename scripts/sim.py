@@ -221,7 +221,7 @@ def run(moves, seed=7, upto=None):
                     if ch == 'partners':
                         if cid == 'v0' and s in ('des', 'dev'): cpu *= 0.6
                         if cid == 'base44' and s == 'smb': cpu *= 0.6
-                        if s in excl_by_seg:
+                        if s in excl_by_seg and q > excl_by_seg[s][1]:   # the partner is live from the next quarter
                             owner, q0 = excl_by_seg[s]
                             cpu *= 0.6 if owner == cid else 1.3
                     n_users = a_amt / cpu * (1 + C['var'] * u)

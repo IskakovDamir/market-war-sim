@@ -116,7 +116,6 @@ def test_free_tier_brings_more_users_and_fewer_payers_per_user():
     assert ft['new_paid'] == pytest.approx(base['new_paid'] * 1.4 * 0.75)
 
 
-@pytest.mark.xfail(strict=True, reason='B11: exclusive partner works in the quarter it is bought')
 def test_exclusive_starts_next_quarter():
     def users(card_q1, spend_q):
         acts = [{'id': 'exclusive', 'seg': 'smb'}] if card_q1 else []
