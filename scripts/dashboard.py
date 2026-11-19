@@ -65,7 +65,7 @@ def page(title, body, when):
 
 def head(cid):
     c = CO[cid]
-    return f'<div class="head"><div class="ini">{INIT[cid]}</div><div><div class="name">{E(c["name"])}</div><div class="pos">{E(c["pos"].lower())}</div></div>'
+    return f'<div class="head" data-company="{cid}"><div class="ini">{INIT[cid]}</div><div><div class="name">{E(c["name"])}</div><div class="pos">{E(c["pos"].lower())}</div></div>'
 
 def view_public(state, cp):
     pub = state.get('public', {}).get(str(cp), {})   # nobody submitted yet: every card says so
@@ -102,10 +102,10 @@ def users_svg(hist, start_users):
         y = i * RH + 14; u = last[c]['users']; s0 = start_users[c]
         w = (W - L - 160) * u / mx; x0 = L + (W - L - 160) * s0 / mx
         d = (u - s0) / s0 * 100
-        out.append(f'<text x="0" y="{y+30}" font-size="22" font-weight="600" fill="#04131B">{E(CO[c]["name"])}</text>')
+        out.append(f'<g data-company="{c}"><text x="0" y="{y+30}" font-size="22" font-weight="600" fill="#04131B">{E(CO[c]["name"])}</text>')
         out.append(f'<rect x="{L}" y="{y+8}" width="{max(4,w):.0f}" height="34" rx="4" fill="#04131B"><title>{E(CO[c]["name"])}: {fmt(u)} пользователей, на старте {fmt(s0)}</title></rect>')
         out.append(f'<line x1="{x0:.0f}" y1="{y+2}" x2="{x0:.0f}" y2="{y+48}" stroke="#F5000D" stroke-width="3"/>')
-        out.append(f'<text x="{L+max(4,w)+12:.0f}" y="{y+32}" font-size="20" font-weight="600" fill="#04131B">{fmt(u)}</text><text x="{L+max(4,w)+12+len(fmt(u))*12+16:.0f}" y="{y+32}" font-size="18" fill="#5B6675">{d:+.0f}% к старту</text>')
+        out.append(f'<text x="{L+max(4,w)+12:.0f}" y="{y+32}" font-size="20" font-weight="600" fill="#04131B">{fmt(u)}</text><text x="{L+max(4,w)+12+len(fmt(u))*12+16:.0f}" y="{y+32}" font-size="18" fill="#5B6675">{d:+.0f}% к старту</text></g>')
     out.append('</svg>')
     return ''.join(out)
 
@@ -144,17 +144,19 @@ def mrr_svg(res):
     ends = []
     for c in ORDER:
         p = ' '.join(f'{X(i):.1f},{Y(v):.1f}' for i, v in enumerate(pts[c]))
+        out.append(f'<g data-company="{c}">')
         out.append(f'<polyline points="{p}" fill="none" stroke="{SER[c]}" stroke-width="2.5" stroke-linejoin="round"/>')
         for i, v in enumerate(pts[c]):
             out.append(f'<circle cx="{X(i):.1f}" cy="{Y(v):.1f}" r="5" fill="{SER[c]}" stroke="#fff" stroke-width="2"><title>{E(CO[c]["name"])}, {["старт","квартал 1","квартал 2","квартал 3"][i]}: {money(v)} в месяц</title></circle>')
+        out.append('</g>')
         ends.append([Y(pts[c][-1]), c, pts[c][-1]])
     ends.sort()
     last_y = -99
     for y, c, v in ends:
         y = max(y, last_y + 22); last_y = y
-        out.append(f'<text x="{W-Rm+14}" y="{y+5:.0f}" font-size="16" font-weight="600" fill="#04131B">{E(CO[c]["name"])} {money(v)}</text>')
+        out.append(f'<text data-company="{c}" x="{W-Rm+14}" y="{y+5:.0f}" font-size="16" font-weight="600" fill="#04131B">{E(CO[c]["name"])} {money(v)}</text>')
     out.append('</svg>')
-    leg = ''.join(f'<span><i style="background:{SER[c]}"></i>{E(CO[c]["name"])}</span>' for c in ORDER)
+    leg = ''.join(f'<span data-company="{c}"><i style="background:{SER[c]}"></i>{E(CO[c]["name"])}</span>' for c in ORDER)
     return f'<div class="legend">{leg}</div>' + ''.join(out)
 
 def view_final(state, res, fs):
@@ -167,7 +169,7 @@ def view_final(state, res, fs):
         b = f' · бонус +{bonus[c]}' if bonus.get(c) else ''
         own = res['owners'][c]
         note = f' · куплена {E(CO[own]["name"])}' if own != c else ''
-        hh = head(c).replace('<div class="head">', '<div class="head" style="margin:0">', 1)
+        hh = head(c).replace('<div class="head" ', '<div class="head" style="margin:0" ', 1)
         rows.append(f'<tr><td class="rk">{i+1}</td><td>{hh}</div></td>'
                     f'<td><div class="bar"><i style="width:{min(100,total[c]):.0f}%"></i></div></td><td class="n" style="font-size:26px;font-weight:600">{total[c]:.0f}</td>'
                     f'<td class="small">цель {fs["goals"][c]:.0f}% · эффективность {fs["eff_score"][c]:.0f}{b}{note}</td></tr>')
@@ -176,7 +178,7 @@ def view_final(state, res, fs):
     for c in ORDER:
         h = last[c]
         spent = h['spent_total']; cac = [x[c]['cac'] for x in res['hist'] if x[c]['cac']]
-        det.append(f'<tr><td>{E(CO[c]["name"])}</td><td class="n">{fmt(h["users"])}</td><td class="n">{fmt(h["paid"])}</td><td class="n">{money(h["mrr"])}</td><td class="n">{h["mrr"]/tot*100:.0f}%</td><td class="n">{money(spent)}</td><td class="n">{"$"+fmt(sum(cac)/len(cac)) if cac else "-"}</td><td class="small">{E(CO[c]["goal"])}</td></tr>')
+        det.append(f'<tr data-company="{c}"><td>{E(CO[c]["name"])}</td><td class="n">{fmt(h["users"])}</td><td class="n">{fmt(h["paid"])}</td><td class="n">{money(h["mrr"])}</td><td class="n">{h["mrr"]/tot*100:.0f}%</td><td class="n">{money(spent)}</td><td class="n">{"$"+fmt(sum(cac)/len(cac)) if cac else "-"}</td><td class="small">{E(CO[c]["goal"])}</td></tr>')
     table = f'<div class="wide"><div class="lbl" style="margin-top:0">цифры после третьего квартала</div><table class="t"><tr><th>компания</th><th class="n">пользователи</th><th class="n">платящие</th><th class="n">выручка в месяц</th><th class="n">доля</th><th class="n">потрачено</th><th class="n">средний CAC</th><th>цель роли</th></tr>{"".join(det)}</table></div>'
     quotes = state.get('quotes', {})
     qc = []
