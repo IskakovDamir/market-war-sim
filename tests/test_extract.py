@@ -7,7 +7,6 @@ from extract import extract, money
 
 FILLED = open(os.path.join(SAMPLES, 'team_doc_filled_rork.md'), encoding='utf-8').read()
 TEMPLATE = open(os.path.join(SAMPLES, 'team_doc_template.md'), encoding='utf-8').read()
-B1 = pytest.mark.xfail(strict=True, reason='B1: thousands comma parsed as a decimal point')
 B2 = pytest.mark.xfail(strict=True, reason='B2: unit letters inside words count as units')
 
 
@@ -26,8 +25,9 @@ B2 = pytest.mark.xfail(strict=True, reason='B2: unit letters inside words count 
     ('abc', 0),
     ('не знаю', 0),
     ('n/a', 0),
-    pytest.param('50,000', 50000, marks=B1),
-    pytest.param('$1,200,000', 1200000, marks=B1),
+    ('50,000', 50000),
+    ('$1,200,000', 1200000),
+    ('1,25M', 1250000),
 ])
 def test_money(text, value):
     assert money(text) == value

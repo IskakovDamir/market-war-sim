@@ -6,7 +6,9 @@ def clean(s):
     s = re.sub(r'\\(.)', r'\1', s); s = s.replace('**', '').replace('<br>', ' ').strip()
     return s
 def money(s):
-    s = clean(s).lower().replace(' ', '').replace(' ', '').replace(',', '.').replace('$', '')
+    s = clean(s).lower().replace(' ', '').replace(' ', '').replace('$', '')
+    s = re.sub(r'(?<=\d),(?=\d{3}(?!\d))', '', s)   # thousands separator: 50,000 and 1,200,000
+    s = s.replace(',', '.')                          # decimal comma: 1,5к
     if not s: return 0
     m = re.search(r'(\d+(?:\.\d+)?)(k|к|тыс|m|м|млн)?', s)
     if not m: return 0
