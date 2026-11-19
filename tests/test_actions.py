@@ -126,7 +126,6 @@ def test_exclusive_starts_next_quarter():
     assert users(True, 2) == pytest.approx(users(False, 2) / 0.6)  # from Q2 on: x0.6 cost for the owner
 
 
-@pytest.mark.xfail(strict=True, reason='B13: custom card "as" mapping is ignored by churn and arrivals')
 def test_custom_as_onboarding_cuts_churn():
     real = run(quarter(v0=dict(actions=[{'id': 'onboarding'}])))['hist'][0]['v0']
     custom = run(quarter(v0=dict(actions=[{'id': 'custom', 'cost': 30000, 'as': 'onboarding'}])))['hist'][0]['v0']

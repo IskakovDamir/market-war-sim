@@ -40,6 +40,12 @@ CARDS = {a['id'] for a in ACTIONS}
 CARD_NAME = {a['id']: a['name'] for a in ACTIONS}
 CARD_FIELDS = dict(attack=('target', 'seg'), copy=('target', 'seg'), exclusive=('seg',), team_deal=('partner',))
 
+def card_ids(mv):
+    """Cards in effect: ids played plus the card a custom action stands in for ("as")."""
+    ids = {a['id'] for a in mv.get('actions', [])}
+    ids |= {a['as'] for a in mv.get('actions', []) if a['id'] == 'custom' and a.get('as')}
+    return ids
+
 def card_ok(a):
     """A known card with every field it needs, pointing at real companies and segments."""
     if 'seg' in a and a['seg'] not in SEG: return False
@@ -256,7 +262,7 @@ def run(moves, seed=7, upto=None):
                     st[cid]['log'].append(f"Q{q}: рефералка привела {ref:,.0f} пользователей")
             for s in SEG_IDS:
                 arrivals[cid][s] = st[cid]['pending'][q - 1][s]
-                if any(a['id'] == 'free_tier' for a in mv.get('actions', [])): arrivals[cid][s] *= 1.4
+                if 'free_tier' in card_ids(mv): arrivals[cid][s] *= 1.4
                 if not has_free(mv.get('plans', [])): arrivals[cid][s] *= 0.6
         # companies without moves (should not happen) keep state
         # ---------- pool cap ----------
@@ -270,10 +276,7 @@ def run(moves, seed=7, upto=None):
         new_paid = {}; arpu = {}
         for cid, mv in qmoves.items():
             plans = mv.get('plans', [{'name': 'Pro', 'price': CO[cid]['price']}])
-            acts = {a['id'] for a in mv.get('actions', [])}
-            if 'custom' in acts:
-                for a in mv['actions']:
-                    if a['id'] == 'custom' and a.get('as'): acts.add(a['as'])
+            acts = card_ids(mv)
             if 'decoy' in acts: st[cid]['decoy'] = True
             if 'upsell' in acts: st[cid]['upsell'] = True
             new_paid[cid] = {}; arpu[cid] = {}
@@ -326,7 +329,7 @@ def run(moves, seed=7, upto=None):
             for s in SEG_IDS: st[c]['paid'][s] = max(0, st[c]['paid'][s] + moves_sw[c][s])
         # ---------- churn ----------
         for cid, mv in qmoves.items():
-            acts = {a['id'] for a in mv.get('actions', [])}
+            acts = card_ids(mv)
             ch = BASE_CHURN * (1 - st[cid]['comm_bonus'][q])
             if 'onboarding' in acts: ch *= 0.7
             for s in SEG_IDS:

@@ -149,7 +149,7 @@ new customers pay  price x 1.15 (decoy, from the quarter it was played) x 1.10 (
 existing customers keep their ARPU; only a real price cut (price < last quarter's chosen price for the segment) moves them to min(ARPU, price)
 ARPU = (old paid x old ARPU + new paid x new price) / (old paid + new paid)
 ```
-Custom card with `"as": X` applies X's conversion effect.
+Custom card with `"as": X` counts as card X everywhere a card id is checked by name: free_tier (arrivals and conversion), decoy, upsell, overpromise (conversion), onboarding (conversion and churn). Cards that need parameters (attack, copy, exclusive, team_deal, mna) or act during acquisition (viral, referral) must be written as themselves.
 
 ### 10. Switching (paid users only)
 ```
