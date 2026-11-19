@@ -77,7 +77,7 @@ Open `$MW/live/index.html` on the projector: the pre-game screen shows each comp
    ```bash
    python3 $MW/scripts/live.py render final
    ```
-   The terminal prints goals and final scores. The page shows the ranking, the MRR chart, the numbers table and each company's events.
+   The terminal prints goals and final scores. The page names the winning team and, for every team, shows its role, the goal of that role with the number it is judged on (start, finish, what was needed), revenue, market share and users from start to finish, and the score. Below: the MRR chart, the numbers table and each company's events. Read it out from the role, not from the size: a newcomer that took 14% of its ICP can beat a leader with twice the revenue.
 
 ## When something goes wrong
 

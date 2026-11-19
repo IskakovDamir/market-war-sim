@@ -115,7 +115,7 @@ CHECK_JS = r"""
   const groups = new Map();
   for (const el of document.querySelectorAll('[data-company]')) {
     if (!shown(el)) continue;
-    const box = el.closest('.grid, table, svg, .legend') || document.body;
+    const box = el.closest('.grid, table, svg, .legend, .teams') || document.body;
     const key = box;
     if (!groups.has(key)) groups.set(key, {name: label(box) + ' ' + el.tagName.toLowerCase(), ids: []});
     groups.get(key).ids.push(el.getAttribute('data-company'));

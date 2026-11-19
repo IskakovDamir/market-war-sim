@@ -5,8 +5,9 @@ views: public(cp) | sim1 | final
 import json, sys, html, math
 sys.path.insert(0, BASE)
 import sim
-from spec import COMPANIES
+from spec import COMPANIES, SEGMENTS
 CO = {c['id']: c for c in COMPANIES}
+SEGN = {s['id']: s['name'] for s in SEGMENTS}
 ORDER = ['lovable', 'bolt', 'v0', 'base44', 'rork']
 INIT = dict(lovable='L', bolt='B', v0='v0', base44='44', rork='R')
 SER = dict(lovable='#2a78d6', bolt='#eb6834', v0='#1baf7a', base44='#eda100', rork='#e87ba4')
@@ -57,6 +58,18 @@ table.t td.n{text-align:right;font-variant-numeric:tabular-nums}
 .q{font-size:18px;line-height:1.45;margin-top:8px}
 .legend{display:flex;gap:22px;flex-wrap:wrap;font-size:17px;margin:6px 0 10px}.legend span{display:flex;align-items:center;gap:8px}.legend i{width:22px;height:4px;border-radius:2px;display:inline-block}
 svg text{font-family:inherit}
+.tm{display:grid;grid-template-columns:44px 250px minmax(0,1.25fr) minmax(0,1fr) 190px;grid-template-areas:"rk co gl sf sc" "rk co gl sf sb";grid-template-rows:auto 1fr;column-gap:24px;padding:24px 0;border-top:1px solid #E6ECF5}
+.tm:first-child{border-top:0;padding-top:6px}
+.tm>.rk{grid-area:rk;line-height:52px}.tm.win>.rk{color:#F5000D}
+.tm>.co{grid-area:co}.tm>.gl{grid-area:gl}.tm>.sf{grid-area:sf}.tm>.sc{grid-area:sc}.tm>.sb{grid-area:sb}
+.tm .lbl{margin-top:0}
+.war{font-size:16px;color:#5B6675;margin-top:10px}
+.gt{font-size:17px;line-height:1.4}
+.gm{font-size:18px;line-height:1.45;margin-top:10px}.gm b{font-variant-numeric:tabular-nums}
+.gm i{font-style:normal;display:block;color:#5B6675;font-size:16px}
+.sf{font-size:17px;line-height:1.8;font-variant-numeric:tabular-nums}.sf span{color:#5B6675}
+.sc{text-align:right;font-size:44px;font-weight:600;line-height:1}
+.sb .bar{min-width:0;margin:14px 0 10px}.sb .small{text-align:right;font-size:15px;line-height:1.45}
 .mob{display:none}
 @media (max-width:700px){
 body{padding:20px 16px 40px}
@@ -69,6 +82,9 @@ h1{font-size:38px;line-height:1.08}
 .name{font-size:22px}.pv{font-size:19px}.ad{font-size:17px}.fs b{font-size:18px}.plans{font-size:16px}.chg{font-size:13px}
 .desk{display:none}.mob{display:block}
 table.t{font-size:16px}
+.tm{grid-template-columns:28px 1fr auto;grid-template-areas:"rk co sc" "sb sb sb" "gl gl gl" "sf sf sf";grid-template-rows:auto;row-gap:12px;column-gap:10px;padding:20px 0}
+.sc{font-size:34px;line-height:52px}.sb .bar{margin:0 0 8px}.sb .small{text-align:left;font-size:14px;display:flex;flex-wrap:wrap;column-gap:14px}
+.gm{font-size:17px}.sf{font-size:16px;line-height:1.7}
 table.rank tr:first-child,table.nums tr:first-child{display:none}
 table.rank tr{display:grid;grid-template-columns:28px 1fr auto;grid-template-areas:"rk co sc" "bar bar bar" "det det det";align-items:center;column-gap:10px;padding:12px 0;border-bottom:1px solid #E6ECF5}
 table.rank td{display:block;padding:0;border:0}
@@ -215,21 +231,53 @@ def mrr_svg_mobile(pts, step, mx):
     out.append('</svg>')
     return ''.join(out)
 
+def seg_rank(rev, cid, seg):
+    """1-based place of a company by revenue in one segment."""
+    return 1 + sum(1 for c in ORDER if c != cid and rev[c][seg] > rev[cid][seg])
+
+def goal_line(cid, start, last, tot0, tot, icps):
+    """The number the role is judged on: where the team started, where it finished, what the role needed."""
+    seg0 = {c: {s: CO[c]['paid'][s] * CO[c]['price'] for s in SEGN} for c in ORDER}
+    seg1 = {c: last[c]['seg_rev'] for c in ORDER}
+    if cid == 'lovable':
+        return 'доля выручки рынка', f'{start[cid]/tot0*100:.0f}%', f'{last[cid]["mrr"]/tot*100:.0f}%', 'нужно не ниже 40%'
+    if cid == 'bolt':
+        return 'выручка в месяц', money(start[cid]), money(last[cid]['mrr']), f'нужно {money(2*start[cid])}'
+    if cid in ('v0', 'base44'):
+        s = 'des' if cid == 'v0' else 'smb'
+        return f'место по выручке в сегменте «{SEGN[s]}»', f'№{seg_rank(seg0, cid, s)}', f'№{seg_rank(seg1, cid, s)}', 'нужно №1'
+    s = icps.get(cid, 'fnd')
+    sh0 = seg0[cid][s] / sum(seg0[c][s] for c in ORDER) * 100
+    sh1 = seg1[cid][s] / max(1, sum(seg1[c][s] for c in ORDER)) * 100
+    return f'доля выручки в сегменте «{SEGN[s]}»', f'{sh0:.0f}%', f'{sh1:.0f}%', 'нужно 20%'
+
 def view_final(state, res, fs):
     last = res['hist'][-1]; tot = sum(last[c]['mrr'] for c in ORDER)
+    start = res['start_mrr']; tot0 = sum(start[c] for c in ORDER); su = start_users()
     bonus = state.get('bonus', {})
     total = {c: fs['final'][c] + bonus.get(c, 0) for c in ORDER}
     rank = sorted(ORDER, key=lambda c: -total[c])
     rows = []
     for i, c in enumerate(rank):
-        b = f' · бонус +{bonus[c]}' if bonus.get(c) else ''
         own = res['owners'][c]
-        note = f' · куплена {E(CO[own]["name"])}' if own != c else ''
+        parts = [f'цель {fs["goals"][c]:.0f}%', f'эффективность {fs["eff_score"][c]:.0f}']
+        parts += [f'бонус +{bonus[c]}'] if bonus.get(c) else []
+        parts += [f'куплена {E(CO[own]["name"])}'] if own != c else []
         hh = head(c).replace('<div class="head" ', '<div class="head" style="margin:0" ', 1)
-        rows.append(f'<tr><td class="rk">{i+1}</td><td>{hh}</div></td>'
-                    f'<td><div class="bar"><i style="width:{min(100,total[c]):.0f}%"></i></div></td><td class="n" style="font-size:26px;font-weight:600">{total[c]:.0f}</td>'
-                    f'<td class="small">цель {fs["goals"][c]:.0f}% · эффективность {fs["eff_score"][c]:.0f}{b}{note}</td></tr>')
-    ranking = f'<div class="wide"><div class="lbl" style="margin-top:0">итоговый счёт: 70% цель роли, 30% эффективность денег</div><table class="t rank"><tr><th></th><th>компания</th><th>счёт</th><th class="n"></th><th>из чего</th></tr>{"".join(rows)}</table></div>'
+        what, a, z, need = goal_line(c, start, last, tot0, tot, state.get('icps', {}))
+        sf = (f'<div><span>выручка в месяц</span> {money(start[c])} → {money(last[c]["mrr"])}</div>'
+              f'<div><span>доля рынка</span> {start[c]/tot0*100:.0f}% → {last[c]["mrr"]/tot*100:.0f}%</div>'
+              f'<div><span>пользователи</span> {fmt(su[c])} → {fmt(last[c]["users"])}</div>'
+              f'<div><span>потрачено</span> {money(last[c]["spent_total"])} из {money(CO[c]["budget"])}</div>')
+        rows.append(f'<div class="tm{" win" if i == 0 else ""}"><div class="rk">{i+1}</div>'
+                    f'<div class="co">{hh}</div><div class="war">{E(CO[c]["war"].lower())}</div></div>'
+                    f'<div class="gl"><div class="lbl">цель роли</div><div class="gt">{E(CO[c]["goal"])}</div>'
+                    f'<div class="gm">{E(what)}: <b>{a} → {z}</b><i>{need} · выполнено на {fs["goals"][c]:.0f}%</i></div></div>'
+                    f'<div class="sf"><div class="lbl">старт → финиш</div>{sf}</div>'
+                    f'<div class="sc">{total[c]:.0f}</div>'
+                    f'<div class="sb"><div class="bar"><i style="width:{min(100,total[c]):.0f}%"></i></div>'
+                    f'<div class="small">{"".join(f"<div>{x}</div>" for x in parts)}</div></div></div>')
+    ranking = f'<div class="wide"><div class="lbl" style="margin-top:0">кто лучше сыграл свою роль: 70% цель роли, 30% эффективность денег</div><div class="teams">{"".join(rows)}</div></div>'
     det = []
     for c in ORDER:
         h = last[c]
@@ -242,7 +290,7 @@ def view_final(state, res, fs):
         logs = ''.join('<div>' + E(_re.sub(r'(?<=[0-9]),(?=[0-9])', ' ', l)) + '</div>' for l in res['logs'].get(c, []))
         qs = ''.join(f'<div class="q">«{E(q)}»</div>' for q in quotes.get(c, []))
         qc.append(f'<div class="card">{head(c)}</div>{qs}<div class="lbl">события</div><div class="log">{logs or "без особых событий"}</div></div>')
-    body = f'''<h1>итоги рынка<span>три квартала войны</span></h1><div class="sub">Выручка, доли и выполнение целей ролей. Цитаты: что говорили AI-покупатели</div>
+    body = f'''<h1>итоги рынка<span>победила команда {E(CO[rank[0]]["name"])}</span></h1><div class="sub">Счёт не про размер компании. Каждая команда играла свою роль со своего старта: лидер защищал долю, претендент рос, нишевые брали свой сегмент, новичок захватывал ICP</div>
 {ranking}<div class="wide"><div class="lbl" style="margin-top:0">выручка в месяц по кварталам</div>{mrr_svg(res)}</div>{table}<div class="grid">{"".join(qc)}</div>'''
     return page('Итоги рынка', body, 'финал')
 

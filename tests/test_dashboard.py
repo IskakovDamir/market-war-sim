@@ -88,3 +88,31 @@ def test_no_em_or_en_dash_in_ui():
         assert not any(d in html for d in DASHES), name
     src = open(os.path.join(ROOT, 'scripts', 'dashboard.py'), encoding='utf-8').read()
     assert not any(d in src for d in DASHES)
+
+
+def test_final_names_the_winning_team_not_the_biggest_company():
+    s = game_state()
+    s['bonus'] = {}
+    html = all_views(s)['final']
+    assert 'победила команда Base44' in html  # Lovable has 2x the revenue, Base44 played its role better
+
+
+def test_final_shows_where_each_team_started_and_what_its_role_needed():
+    s = game_state()
+    html = all_views(s)['final']
+    for line in ('доля выручки рынка: <b>47% → 45%</b>',
+                 'выручка в месяц: <b>$100k → $132k</b>',
+                 '«Дизайнеры и продакты»: <b>№2 → №1</b>',
+                 '«Малый бизнес и агентства»: <b>№2 → №1</b>',
+                 '«Фаундеры без кода»: <b>7% → 14%</b>'):
+        assert line in html, line
+    assert html.count('старт → финиш') == 5
+    assert 'нужно $200k · выполнено на 32%' in html
+
+
+def test_rork_goal_line_follows_the_checkpoint_1_icp():
+    s = game_state()
+    s['icps'] = {'rork': 'smb'}
+    rows = all_views(s)['final'].split('<div class="tm')[1:]
+    rork = next(r for r in rows if 'data-company="rork"' in r)
+    assert 'доля выручки в сегменте «Малый бизнес и агентства»: <b>' in rork
