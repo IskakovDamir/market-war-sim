@@ -94,11 +94,17 @@ def run(moves, seed=7, upto=None):
             for a in mv.get('actions', []):
                 if a['id'] == 'mna' and 'buyer' not in a:   # the seller's card only marks consent
                     t = a['target']
+                    if st[t]['owner'] == cid: continue   # already ours: the same deal written again costs nothing
+                    if t == cid or st[t]['owner'] != t or st[cid]['owner'] != cid:
+                        st[cid]['log'].append(f"Q{q}: сделка с {CO[t]['name']} не засчитана: одна из компаний уже куплена")
+                        continue
                     tm = qmoves.get(t, {})
                     agreed = any(x['id'] == 'mna' and x.get('buyer') == cid for x in tm.get('actions', []))
                     min_price = 3 * 3 * sum(st[t]['paid'][s] for s in SEG_IDS) * CO[t]['price']
                     if agreed and a.get('price', 0) >= min_price * 0.999:
-                        st[t]['owner'] = cid; st[cid]['spent'] += a['price']
+                        for x in st:   # the target and anything it owned now belong to the buyer
+                            if st[x]['owner'] == t: st[x]['owner'] = cid
+                        st[cid]['spent'] += a['price']
                         st[cid]['log'].append(f"Q{q}: купили {CO[t]['name']} за ${a['price']:,.0f}")
                     else:
                         st[cid]['log'].append(f"Q{q}: сделка с {CO[t]['name']} не засчитана (нет согласия или цена ниже ${min_price:,.0f})")

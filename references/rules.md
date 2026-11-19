@@ -74,7 +74,7 @@ Unknown company ids are dropped and listed in `res["warnings"]`. Unknown channel
 A company without a move this quarter replays its previous move (first quarter: one plan "Pro" at list price, icp `fnd`, all scores 5) with `spend = {}`, `actions = []`, `consistency = 1`.
 
 ### 2. M&A
-A buyer action `{"id": "mna", "target": T, "price": P}` is accepted when T's move this quarter has `{"id": "mna", "buyer": <buyer>}` (the seller's card only marks consent and is never resolved as a purchase) and `P >= 3 x 3 x paid(T) x list_price(T)` (three quarterly revenues). Accepted: T's owner becomes the buyer, P is added to the buyer's spent. T keeps playing its own moves as the buyer's brand. In final scoring the buyer and every company it owns are one group.
+A buyer action `{"id": "mna", "target": T, "price": P}` is accepted when T's move this quarter has `{"id": "mna", "buyer": <buyer>}` (the seller's card only marks consent and is never resolved as a purchase) and `P >= 3 x 3 x paid(T) x list_price(T)` (three quarterly revenues). Accepted: T's owner becomes the buyer, P is added to the buyer's spent. T keeps playing its own moves as the buyer's brand. The same deal written again in a later quarter is ignored and costs nothing. A company that is already owned can neither buy nor be bought again. In final scoring the buyer and every company it owns are one group.
 
 ### 3. Effective score per segment
 ```

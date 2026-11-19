@@ -67,7 +67,6 @@ def test_group_budget_not_double_counted():
     assert h['lovable']['spent_total'] + h['rork']['spent_total'] <= 1_150_000 + 1e-6
 
 
-@pytest.mark.xfail(strict=True, reason='B9: the same M&A declared again is bought and paid again')
 def test_repeat_declaration_charged_once():
     res = run(deal(), deal())
     assert res['hist'][-1]['lovable']['spent_total'] == 500000
@@ -79,3 +78,15 @@ def test_price_above_budget_rejected():
     res = run(deal(price=5_000_000))
     assert res['owners']['rork'] == 'rork'
     assert res['hist'][0]['lovable']['spent_total'] == 0
+
+
+def test_acquired_company_cannot_buy_and_cannot_be_bought_twice():
+    q1 = deal()
+    q2 = quarter(rork=dict(actions=[{'id': 'mna', 'target': 'v0', 'price': 2_000_000}]),
+                 v0=dict(actions=[{'id': 'mna', 'buyer': 'rork'}]),
+                 bolt=dict(actions=[{'id': 'mna', 'target': 'rork', 'price': 500000}]))
+    res = run(q1, q2)
+    assert res['owners'] == dict(lovable='lovable', bolt='bolt', v0='v0', base44='base44', rork='lovable')
+    assert any('уже куплена' in l for l in res['logs']['rork'])
+    assert any('уже куплена' in l for l in res['logs']['bolt'])
+    assert res['hist'][-1]['bolt']['spent_total'] == 0
