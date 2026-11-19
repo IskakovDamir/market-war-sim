@@ -96,7 +96,7 @@ The first `{"id": "exclusive", "seg": S}` claim wins segment S for the rest of t
 ### 5. Budget
 ```
 cards  = sum of card prices this quarter (a second decoy is free and does nothing)
-left   = budget - spent  (+ remaining budget of every company this one owns)
+left   = sum of (budget - spent) over the owner group (a buyer and the companies it bought share one pool)
 if channels + cards > left:  every channel is scaled by k = max(0, (left - cards) / channels)
 spent += channels + cards
 ```

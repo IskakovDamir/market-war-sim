@@ -171,10 +171,7 @@ def run(moves, seed=7, upto=None):
                 elif a['id'] == 'decoy' and st[cid]['decoy']: pass
                 else: act_cost += ACTION_COST.get(a['id'], 0)
             total = sum(spend.values()) + act_cost
-            budget_left = CO[cid]['budget'] - st[cid]['spent']
-            # buyers can use acquired budgets
-            for t in st:
-                if t != cid and st[t]['owner'] == cid: budget_left += CO[t]['budget'] - st[t]['spent']
+            budget_left = group_left(st, st[cid]['owner'])   # buyer and bought companies share one pool
             if total > budget_left and total > 0:
                 k = max(0.0, (budget_left - act_cost) / max(1, sum(spend.values())))
                 spend = {ch: v * k for ch, v in spend.items()}

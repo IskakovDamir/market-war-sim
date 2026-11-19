@@ -60,11 +60,10 @@ def test_mna_below_three_quarterly_revenues_is_rejected():
     assert ok['owners']['rork'] == 'lovable'
 
 
-@pytest.mark.xfail(strict=True, reason='B8: after M&A the target budget is counted twice')
 def test_group_budget_not_double_counted():
     res = run(deal(), quarter(lovable=dict(spend={'social': 650000}), rork=dict(spend={'creators': 150000})))
     h = res['hist'][-1]
-    assert h['lovable']['spent_total'] + h['rork']['spent_total'] <= 1_150_000 + 1e-6
+    assert h['lovable']['spent_total'] + h['rork']['spent_total'] == pytest.approx(1_150_000)
 
 
 def test_repeat_declaration_charged_once():
