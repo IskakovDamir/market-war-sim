@@ -8,7 +8,7 @@ in a temp live folder, then opened at 1440x900 and 390x844.
 
 A page fails on:
   - text overflowing its container (scrollWidth > clientWidth) or the page scrolling sideways
-  - two text boxes overlapping
+  - two text boxes overlapping, or a chart mark (bar, start tick, dot) covering text
   - a company list (cards, table rows, chart rows, legend) with fewer or more than the 5 companies
   - text under 14px on desktop (under 12px on the phone)
   - the name of the removed sixth company anywhere in the page
@@ -36,13 +36,16 @@ CHECK_JS = r"""
 ([minFont, cids, banned]) => {
   const problems = [];
   const vw = document.documentElement.clientWidth;
-  const shown = el => {
+  const displayed = el => {
     for (let e = el; e && e.nodeType === 1; e = e.parentElement) {
       const s = getComputedStyle(e);
       if (s.display === 'none' || s.visibility === 'hidden') return false;
     }
+    return true;
+  };
+  const shown = el => {
     const r = el.getBoundingClientRect();
-    return r.width > 0 && r.height > 0;
+    return displayed(el) && r.width > 0 && r.height > 0;
   };
   const label = el => `<${el.tagName.toLowerCase()}${el.className && typeof el.className === 'string' ? '.' + el.className.split(' ').join('.') : ''}>`;
   const text = el => (el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 50);
@@ -92,6 +95,19 @@ CHECK_JS = r"""
       const w = Math.min(a.r, b.r) - Math.max(a.l, b.l), h = Math.min(a.b, b.b) - Math.max(a.t, b.t);
       if (w > 1 && h > 1)
         problems.push(`overlap "${text(boxes[i].el)}" and "${text(boxes[j].el)}"`);
+    }
+  }
+
+  // chart marks (bars, red start ticks, dots) must not cover text; light grid lines may
+  for (const m of document.querySelectorAll('svg rect, svg circle, svg line')) {
+    if (!displayed(m) || (m.getAttribute('stroke') || '').toUpperCase() === '#E6ECF5') continue;   // a vertical tick has zero width
+    const g = m.getBoundingClientRect(), svg = m.ownerSVGElement, vb = svg.viewBox.baseVal;
+    const half = parseFloat(m.getAttribute('stroke-width') || 0) / 2 * (vb && vb.width ? svg.getBoundingClientRect().width / vb.width : 1);
+    const r = {left: g.left - half, right: g.right + half, top: g.top - half, bottom: g.bottom + half};
+    for (const t of boxes) {
+      const a = core(t.r);
+      const w = Math.min(a.r, r.right) - Math.max(a.l, r.left), h = Math.min(a.b, r.bottom) - Math.max(a.t, r.top);
+      if (w > 1 && h > 1) problems.push(`chart mark <${m.tagName}> covers "${text(t.el)}"`);
     }
   }
 
