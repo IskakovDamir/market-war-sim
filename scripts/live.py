@@ -80,10 +80,10 @@ if __name__ == '__main__':
         if view == 'wait': h = dashboard.view_wait()
         elif view.startswith('public'): h = dashboard.view_public(s, int(view[-1]))
         elif view == 'sim1':
-            r = sim.run({'quarters': s['quarters']}, seed=s['seed'], upto=2); h = dashboard.view_sim1(s, r)
+            r = sim.run({'quarters': s['quarters']}, seed=s['seed'], upto=2, arpu_reset=s.get('arpu_reset', False)); h = dashboard.view_sim1(s, r)
             for c, v in r['hist'][-1].items(): print(c, round(v['users']))
         else:   # final
-            r = sim.run({'quarters': s['quarters']}, seed=s['seed']); fs = sim.final_scores(r, s['icps']); h = dashboard.view_final(s, r, fs)
+            r = sim.run({'quarters': s['quarters']}, seed=s['seed'], arpu_reset=s.get('arpu_reset', False)); fs = sim.final_scores(r, s['icps']); h = dashboard.view_final(s, r, fs)
             print({k: {c: round(v, 1) for c, v in fs[k].items()} for k in ('goals', 'final')})
         os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
         open(out, 'w', encoding='utf-8').write(h); print('rendered', out)
@@ -91,7 +91,7 @@ if __name__ == '__main__':
         if not s['quarters']: sys.exit('!! нет ходов: сначала live.py moves <cp> <moves.json>')
         outdir = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, 'out', 'sim1')
         os.makedirs(outdir, exist_ok=True)
-        r = sim.run({'quarters': s['quarters']}, seed=s['seed'], upto=2)
+        r = sim.run({'quarters': s['quarters']}, seed=s['seed'], upto=2, arpu_reset=s.get('arpu_reset', False))
         open(os.path.join(outdir, 'market.html'), 'w', encoding='utf-8').write(dashboard.view_sim1_market(s, r))
         for c in dashboard.ORDER: open(os.path.join(outdir, f'{c}.html'), 'w', encoding='utf-8').write(dashboard.view_sim1_team(s, r, c))
         for c, v in r['hist'][-1].items(): print(c, round(v['users']))

@@ -474,9 +474,9 @@ if __name__ == '__main__':
     elif view in ('public1', 'public2', 'public3'):
         html_ = view_public(state, int(view[-1]))
     elif view == 'sim1':
-        res = sim.run(moves, seed=state.get('seed', 7), upto=2); html_ = view_sim1(state, res)
+        res = sim.run(moves, seed=state.get('seed', 7), upto=2, arpu_reset=state.get('arpu_reset', False)); html_ = view_sim1(state, res)
     elif view == 'final':
-        res = sim.run(moves, seed=state.get('seed', 7)); fs = sim.final_scores(res, state.get('icps', {})); html_ = view_final(state, res, fs)
+        res = sim.run(moves, seed=state.get('seed', 7), arpu_reset=state.get('arpu_reset', False)); fs = sim.final_scores(res, state.get('icps', {})); html_ = view_final(state, res, fs)
     else:
         sys.exit(f'unknown view {view}: wait | public1 | public2 | public3 | sim1 | final')
     open(out, 'w', encoding='utf-8').write(html_)

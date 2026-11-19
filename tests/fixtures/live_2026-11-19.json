@@ -1,0 +1,433 @@
+{
+ "game": "nFactorial live game, 19 November 2026: state after checkpoints 1 and 2 (moves only, no team texts)",
+ "seed": 7,
+ "arpu_reset": true,
+ "icps": {
+  "lovable": "fnd",
+  "bolt": "fnd",
+  "v0": "des",
+  "base44": "smb",
+  "rork": "fnd"
+ },
+ "predictions": {
+  "lovable": {
+   "lovable": 70000,
+   "bolt": 44000,
+   "v0": 26000,
+   "base44": 18000,
+   "rork": 8000
+  },
+  "bolt": {
+   "lovable": 60000,
+   "bolt": 33000,
+   "v0": 23000,
+   "base44": 15500,
+   "rork": 7000
+  },
+  "v0": {
+   "lovable": 62300,
+   "bolt": 35200,
+   "v0": 22800,
+   "base44": 15100,
+   "rork": 5600
+  },
+  "base44": {
+   "lovable": 62000,
+   "bolt": 33000,
+   "v0": 22000,
+   "base44": 20000,
+   "rork": 6200
+  },
+  "rork": {
+   "lovable": 56000,
+   "bolt": 35000,
+   "v0": 22000,
+   "base44": 15000,
+   "rork": 6500
+  }
+ },
+ "quarters": [
+  {
+   "lovable": {
+    "icp": "fnd",
+    "scores": {
+     "stud": 5,
+     "fnd": 9,
+     "des": 5,
+     "dev": 5,
+     "smb": 6
+    },
+    "consistency": 1,
+    "actions": [
+     {
+      "id": "onboarding"
+     },
+     {
+      "id": "decoy"
+     },
+     {
+      "id": "upsell"
+     },
+     {
+      "id": "custom",
+      "cost": 40000
+     }
+    ],
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Pro",
+      "price": 30
+     },
+     {
+      "name": "Business",
+      "price": 60
+     }
+    ],
+    "spend": {
+     "creators": 20000,
+     "telegram": 40000,
+     "seo": 30000,
+     "geo": 50000,
+     "community": 120000,
+     "events": 30000
+    }
+   },
+   "bolt": {
+    "icp": "fnd",
+    "scores": {
+     "stud": 5,
+     "fnd": 8,
+     "des": 4,
+     "dev": 6,
+     "smb": 5
+    },
+    "consistency": 1,
+    "actions": [
+     {
+      "id": "onboarding"
+     },
+     {
+      "id": "decoy"
+     },
+     {
+      "id": "upsell"
+     }
+    ],
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Pro",
+      "price": 25
+     },
+     {
+      "name": "Launch (основной, «популярный»)",
+      "price": 39
+     }
+    ],
+    "spend": {
+     "creators": 35000,
+     "telegram": 40000,
+     "seo": 20000,
+     "geo": 50000,
+     "eam": 30000
+    }
+   },
+   "v0": {
+    "icp": "des",
+    "scores": {
+     "stud": 4,
+     "fnd": 4,
+     "des": 8,
+     "dev": 5,
+     "smb": 3
+    },
+    "consistency": 1,
+    "actions": [
+     {
+      "id": "onboarding"
+     }
+    ],
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Pro",
+      "price": 30
+     }
+    ],
+    "spend": {
+     "social": 10000,
+     "creators": 45000,
+     "seo": 65000,
+     "geo": 20000
+    }
+   },
+   "base44": {
+    "icp": "smb",
+    "scores": {
+     "stud": 2,
+     "fnd": 5,
+     "des": 3,
+     "dev": 2,
+     "smb": 8
+    },
+    "consistency": 1,
+    "actions": [
+     {
+      "id": "onboarding"
+     }
+    ],
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Бизнес",
+      "price": 59
+     },
+     {
+      "name": "Агентство",
+      "price": 149
+     }
+    ],
+    "spend": {
+     "search": 40000,
+     "seo": 20000,
+     "geo": 20000,
+     "partners": 40000
+    }
+   },
+   "rork": {
+    "icp": "fnd",
+    "scores": {
+     "stud": 3,
+     "fnd": 7,
+     "des": 3,
+     "dev": 3,
+     "smb": 5
+    },
+    "consistency": 1,
+    "actions": [],
+    "plans": [
+     {
+      "name": "Free Trial",
+      "price": 0
+     },
+     {
+      "name": "RORK PRO",
+      "price": 40
+     },
+     {
+      "name": "RORK MAX",
+      "price": 60
+     }
+    ],
+    "spend": {}
+   }
+  },
+  {
+   "lovable": {
+    "icp": "fnd",
+    "scores": {
+     "stud": 5,
+     "fnd": 8.5,
+     "des": 5,
+     "dev": 5,
+     "smb": 6
+    },
+    "consistency": 1,
+    "actions": [
+     {
+      "id": "copy",
+      "target": "rork",
+      "seg": "fnd"
+     },
+     {
+      "id": "referral"
+     }
+    ],
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Pro",
+      "price": 30
+     },
+     {
+      "name": "Business",
+      "price": 60
+     }
+    ],
+    "spend": {
+     "creators": 20000,
+     "telegram": 50000,
+     "geo": 50000,
+     "community": 100000,
+     "events": 30000
+    }
+   },
+   "bolt": {
+    "icp": "fnd",
+    "scores": {
+     "stud": 5,
+     "fnd": 8,
+     "des": 4,
+     "dev": 7,
+     "smb": 5
+    },
+    "consistency": 1,
+    "actions": [
+     {
+      "id": "copy",
+      "target": "lovable",
+      "seg": "fnd"
+     }
+    ],
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Pro",
+      "price": 25
+     },
+     {
+      "name": "Launch (основной, «популярный»)",
+      "price": 39
+     }
+    ],
+    "spend": {
+     "social": 10000,
+     "shorts": 5000,
+     "creators": 15000,
+     "telegram": 25000,
+     "geo": 40000,
+     "partners": 40000,
+     "eam": 30000,
+     "events": 30000
+    }
+   },
+   "v0": {
+    "icp": "des",
+    "scores": {
+     "stud": 3,
+     "fnd": 4,
+     "des": 8,
+     "dev": 4,
+     "smb": 4
+    },
+    "consistency": 1,
+    "actions": [
+     {
+      "id": "upsell"
+     }
+    ],
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Pro",
+      "price": 30
+     },
+     {
+      "name": "Business",
+      "price": 60
+     }
+    ],
+    "spend": {
+     "geo": 95000,
+     "community": 25000,
+     "partners": 35000,
+     "sales": 40000
+    }
+   },
+   "base44": {
+    "icp": "smb",
+    "scores": {
+     "stud": 2,
+     "fnd": 4,
+     "des": 3,
+     "dev": 2,
+     "smb": 9
+    },
+    "consistency": 1,
+    "actions": [
+     {
+      "id": "attack",
+      "target": "lovable",
+      "seg": "smb"
+     },
+     {
+      "id": "decoy"
+     }
+    ],
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Бизнес",
+      "price": 59
+     },
+     {
+      "name": "Агентство",
+      "price": 149
+     }
+    ],
+    "spend": {
+     "search": 60000,
+     "geo": 20000,
+     "partners": 50000
+    }
+   },
+   "rork": {
+    "icp": "fnd",
+    "scores": {
+     "stud": 3,
+     "fnd": 7,
+     "des": 3,
+     "dev": 3,
+     "smb": 5
+    },
+    "consistency": 1,
+    "actions": [],
+    "plans": [
+     {
+      "name": "Free Trial",
+      "price": 0
+     },
+     {
+      "name": "RORK PRO",
+      "price": 35
+     },
+     {
+      "name": "RORK MAX",
+      "price": 60
+     }
+    ],
+    "spend": {
+     "creators": 15000,
+     "telegram": 20000,
+     "geo": 20000,
+     "sales": 40000
+    }
+   }
+  }
+ ]
+}

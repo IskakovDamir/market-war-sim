@@ -70,7 +70,10 @@ def group_left(st, owner):
     """Budget left for everything one owner controls: its own budget plus every company it bought."""
     return sum(CO[t]['budget'] - st[t]['spent'] for t in st if st[t]['owner'] == owner)
 
-def run(moves, seed=7, upto=None):
+def run(moves, seed=7, upto=None, arpu_reset=False):
+    """arpu_reset=True replays the rule the live game of 19 Nov 2026 ran on (before B12): whenever the plan price is
+    below existing customers' ARPU, their ARPU drops to the price, so decoy and upsell premiums reset each quarter.
+    The default keeps the premium unless the price is really cut. Set by state['arpu_reset'] in live.py."""
     rnd = random.Random(seed)
     Q = moves['quarters'][:upto] if upto else moves['quarters']
     st = {}
@@ -297,7 +300,7 @@ def run(moves, seed=7, upto=None):
                 if price > 0:
                     pnew = price * (1.15 if st[cid]['decoy'] else 1) * (1.10 if st[cid]['upsell'] else 1)
                     old = st[cid]['paid'][s]; a_old = st[cid]['arpu'][s]
-                    if price < st[cid]['prev_price'][s]: a_old = min(a_old, price)   # a real price cut reaches existing customers
+                    if arpu_reset or price < st[cid]['prev_price'][s]: a_old = min(a_old, price)   # a real price cut reaches existing customers
                     st[cid]['arpu'][s] = (old * a_old + np_ * pnew) / max(1e-9, old + np_)
                 st[cid]['paid'][s] += np_
                 st[cid]['free'][s] += arrivals[cid][s] * (1 - rate) + sales_arr[cid][s] * 0.4
