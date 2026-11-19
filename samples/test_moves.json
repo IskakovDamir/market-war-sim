@@ -1,0 +1,525 @@
+{
+ "quarters": [
+  {
+   "lovable": {
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Pro",
+      "price": 25
+     },
+     {
+      "name": "Business",
+      "price": 50
+     }
+    ],
+    "icp": "fnd",
+    "scores": {
+     "stud": 6,
+     "fnd": 8,
+     "des": 6,
+     "dev": 4,
+     "smb": 6
+    },
+    "consistency": 1,
+    "spend": {
+     "social": 80000,
+     "creators": 60000,
+     "community": 60000,
+     "seo": 50000,
+     "search": 40000
+    },
+    "actions": [
+     {
+      "id": "decoy"
+     }
+    ]
+   },
+   "bolt": {
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Pro",
+      "price": 20
+     },
+     {
+      "name": "Teams",
+      "price": 40
+     }
+    ],
+    "icp": "fnd",
+    "scores": {
+     "stud": 6,
+     "fnd": 7,
+     "des": 4,
+     "dev": 7,
+     "smb": 4
+    },
+    "consistency": 1,
+    "spend": {
+     "social": 60000,
+     "shorts": 30000,
+     "creators": 40000,
+     "search": 40000
+    },
+    "actions": [
+     {
+      "id": "attack",
+      "target": "lovable",
+      "seg": "fnd"
+     }
+    ]
+   },
+   "v0": {
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Premium",
+      "price": 20
+     },
+     {
+      "name": "Team",
+      "price": 30
+     }
+    ],
+    "icp": "des",
+    "scores": {
+     "stud": 4,
+     "fnd": 5,
+     "des": 8,
+     "dev": 7,
+     "smb": 3
+    },
+    "consistency": 1,
+    "spend": {
+     "partners": 60000,
+     "creators": 30000,
+     "geo": 20000
+    },
+    "actions": []
+   },
+   "base44": {
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Builder",
+      "price": 40
+     },
+     {
+      "name": "Business",
+      "price": 80
+     }
+    ],
+    "icp": "smb",
+    "scores": {
+     "stud": 3,
+     "fnd": 6,
+     "des": 4,
+     "dev": 3,
+     "smb": 8
+    },
+    "consistency": 1,
+    "spend": {
+     "partners": 60000,
+     "search": 40000,
+     "sales": 40000
+    },
+    "actions": []
+   },
+   "rork": {
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Pro",
+      "price": 25
+     },
+     {
+      "name": "Max",
+      "price": 60
+     }
+    ],
+    "icp": "fnd",
+    "scores": {
+     "stud": 5,
+     "fnd": 8,
+     "des": 5,
+     "dev": 4,
+     "smb": 6
+    },
+    "consistency": 1,
+    "spend": {
+     "telegram": 20000,
+     "creators": 20000
+    },
+    "actions": []
+   }
+  },
+  {
+   "lovable": {
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Pro",
+      "price": 25
+     },
+     {
+      "name": "Business",
+      "price": 50
+     }
+    ],
+    "icp": "fnd",
+    "scores": {
+     "stud": 6,
+     "fnd": 8,
+     "des": 6,
+     "dev": 4,
+     "smb": 6
+    },
+    "consistency": 1,
+    "spend": {
+     "social": 80000,
+     "community": 60000,
+     "seo": 40000,
+     "search": 60000,
+     "events": 40000
+    },
+    "actions": [
+     {
+      "id": "onboarding"
+     },
+     {
+      "id": "copy",
+      "target": "rork",
+      "seg": "fnd"
+     }
+    ]
+   },
+   "bolt": {
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Pro",
+      "price": 20
+     },
+     {
+      "name": "Teams",
+      "price": 40
+     }
+    ],
+    "icp": "fnd",
+    "scores": {
+     "stud": 6,
+     "fnd": 7,
+     "des": 4,
+     "dev": 7,
+     "smb": 4
+    },
+    "consistency": 1,
+    "spend": {
+     "social": 60000,
+     "shorts": 40000,
+     "creators": 50000
+    },
+    "actions": [
+     {
+      "id": "referral"
+     }
+    ]
+   },
+   "v0": {
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Premium",
+      "price": 20
+     },
+     {
+      "name": "Team",
+      "price": 30
+     }
+    ],
+    "icp": "des",
+    "scores": {
+     "stud": 4,
+     "fnd": 5,
+     "des": 8,
+     "dev": 7,
+     "smb": 3
+    },
+    "consistency": 1,
+    "spend": {
+     "partners": 50000,
+     "creators": 40000,
+     "geo": 30000
+    },
+    "actions": [
+     {
+      "id": "upsell"
+     }
+    ]
+   },
+   "base44": {
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Builder",
+      "price": 40
+     },
+     {
+      "name": "Business",
+      "price": 80
+     }
+    ],
+    "icp": "smb",
+    "scores": {
+     "stud": 3,
+     "fnd": 6,
+     "des": 4,
+     "dev": 3,
+     "smb": 8
+    },
+    "consistency": 1,
+    "spend": {
+     "partners": 60000,
+     "sales": 50000,
+     "search": 30000
+    },
+    "actions": [
+     {
+      "id": "onboarding"
+     }
+    ]
+   },
+   "rork": {
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Pro",
+      "price": 25
+     },
+     {
+      "name": "Max",
+      "price": 60
+     }
+    ],
+    "icp": "fnd",
+    "scores": {
+     "stud": 5,
+     "fnd": 8,
+     "des": 5,
+     "dev": 4,
+     "smb": 6
+    },
+    "consistency": 1,
+    "spend": {
+     "telegram": 20000,
+     "shorts": 15000
+    },
+    "actions": [
+     {
+      "id": "team_deal",
+      "partner": "v0",
+      "seg": "fnd"
+     }
+    ]
+   }
+  },
+  {
+   "lovable": {
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Pro",
+      "price": 25
+     },
+     {
+      "name": "Business",
+      "price": 50
+     }
+    ],
+    "icp": "fnd",
+    "scores": {
+     "stud": 6,
+     "fnd": 8,
+     "des": 6,
+     "dev": 4,
+     "smb": 6
+    },
+    "consistency": 1,
+    "spend": {
+     "social": 100000,
+     "search": 60000,
+     "creators": 50000
+    },
+    "actions": [
+     {
+      "id": "upsell"
+     }
+    ]
+   },
+   "bolt": {
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Pro",
+      "price": 20
+     },
+     {
+      "name": "Teams",
+      "price": 40
+     }
+    ],
+    "icp": "fnd",
+    "scores": {
+     "stud": 6,
+     "fnd": 7,
+     "des": 4,
+     "dev": 7,
+     "smb": 4
+    },
+    "consistency": 1,
+    "spend": {
+     "social": 80000,
+     "creators": 60000,
+     "search": 40000
+    },
+    "actions": [
+     {
+      "id": "viral"
+     }
+    ]
+   },
+   "v0": {
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Premium",
+      "price": 20
+     },
+     {
+      "name": "Team",
+      "price": 30
+     }
+    ],
+    "icp": "des",
+    "scores": {
+     "stud": 4,
+     "fnd": 5,
+     "des": 8,
+     "dev": 7,
+     "smb": 3
+    },
+    "consistency": 1,
+    "spend": {
+     "partners": 40000,
+     "creators": 50000,
+     "social": 30000
+    },
+    "actions": []
+   },
+   "base44": {
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Builder",
+      "price": 40
+     },
+     {
+      "name": "Business",
+      "price": 80
+     }
+    ],
+    "icp": "smb",
+    "scores": {
+     "stud": 3,
+     "fnd": 6,
+     "des": 4,
+     "dev": 3,
+     "smb": 8
+    },
+    "consistency": 1,
+    "spend": {
+     "sales": 60000,
+     "search": 40000
+    },
+    "actions": [
+     {
+      "id": "decoy"
+     }
+    ]
+   },
+   "rork": {
+    "plans": [
+     {
+      "name": "Free",
+      "price": 0
+     },
+     {
+      "name": "Pro",
+      "price": 25
+     },
+     {
+      "name": "Max",
+      "price": 60
+     }
+    ],
+    "icp": "fnd",
+    "scores": {
+     "stud": 5,
+     "fnd": 8,
+     "des": 5,
+     "dev": 4,
+     "smb": 6
+    },
+    "consistency": 1,
+    "spend": {
+     "telegram": 25000,
+     "creators": 20000
+    },
+    "actions": []
+   }
+  }
+ ]
+}
