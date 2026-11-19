@@ -15,4 +15,4 @@ def show(m, icps={'rork':'fnd'}, seed=7):
         if l: print(c,l)
     return r,f
 if __name__=='__main__':
-    show(json.load(open(sys.argv[1])))
+    show(json.load(open(sys.argv[1], encoding='utf-8')))

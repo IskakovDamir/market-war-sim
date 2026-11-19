@@ -18,7 +18,8 @@ def nice(mx, n=5):
     for m in (1, 2, 2.5, 5, 10):
         if m * mag >= raw: step = m * mag; break
     return step, step * math.ceil(mx / step)
-LOGO = open(BASE + '/out/nf_logo_b64.txt').read().strip()
+ROOT = _os.path.dirname(BASE)
+LOGO = open(_os.path.join(ROOT, 'assets', 'nf_logo_b64.txt'), encoding='utf-8').read().strip()
 def money(n):
     return f"${n/1e6:.2f}M" if n >= 1e6 else f"${n/1e3:.0f}k"
 
@@ -189,7 +190,7 @@ def view_final(state, res, fs):
 
 if __name__ == '__main__':
     view, state_path, out = sys.argv[1], sys.argv[2], sys.argv[3]
-    state = json.load(open(state_path))
+    state = json.load(open(state_path, encoding='utf-8'))
     if view.startswith('public'):
         html_ = view_public(state, int(view[-1]))
     else:
@@ -198,7 +199,7 @@ if __name__ == '__main__':
             res = sim.run(moves, seed=state.get('seed', 7), upto=2); html_ = view_sim1(state, res)
         else:
             res = sim.run(moves, seed=state.get('seed', 7)); fs = sim.final_scores(res, state.get('icps', {})); html_ = view_final(state, res, fs)
-    open(out, 'w').write(html_)
+    open(out, 'w', encoding='utf-8').write(html_)
     print('ok', out, len(html_))
 
 def view_wait():

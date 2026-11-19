@@ -130,5 +130,7 @@ html = f'''<html><head><meta charset="utf-8"></head><body style="font-family:Ari
 <h2>Карточки действий</h2>
 {tbl(['Карточка', 'Стоимость', 'Эффект', 'Шанс', 'Риск'], act_rows)}
 </body></html>'''
-open(BASE + '/out/team_doc.html', 'w').write(html)
-print(len(html))
+OUT = _os.path.join(_os.path.dirname(BASE), 'out', 'team_doc.html')
+_os.makedirs(_os.path.dirname(OUT), exist_ok=True)
+open(OUT, 'w', encoding='utf-8').write(html)
+print(len(html), OUT)

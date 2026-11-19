@@ -57,5 +57,5 @@ def extract(md, n):
             r['econ'] = {row[0][:30]: row[1] for row in body if len(row) > 1 and row[1]}
     return r
 if __name__ == '__main__':
-    md = open(sys.argv[1]).read(); n = int(sys.argv[2])
+    md = open(sys.argv[1], encoding='utf-8').read(); n = int(sys.argv[2])
     print(json.dumps(extract(md, n), ensure_ascii=False, indent=1))

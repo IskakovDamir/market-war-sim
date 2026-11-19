@@ -8,10 +8,12 @@ import sys, json, os, re
 sys.path.insert(0, BASE)
 from extract import extract
 import dashboard, sim
-ST = BASE + '/live/state.json'
+ROOT = os.path.dirname(BASE)
+LIVE = os.environ.get('MARKET_WAR_LIVE') or os.path.join(ROOT, 'live')
+ST = os.path.join(LIVE, 'state.json')
 def load():
-    return json.load(open(ST)) if os.path.exists(ST) else dict(public={}, raw={}, quarters=[], seed=7, icps={}, predictions={}, bonus={}, quotes={})
-def save(s): os.makedirs(os.path.dirname(ST), exist_ok=True); json.dump(s, open(ST, 'w'), ensure_ascii=False, indent=1)
+    return json.load(open(ST, encoding='utf-8')) if os.path.exists(ST) else dict(public={}, raw={}, quarters=[], seed=7, icps={}, predictions={}, bonus={}, quotes={})
+def save(s): os.makedirs(os.path.dirname(ST), exist_ok=True); json.dump(s, open(ST, 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 def cid_of(name):
     n = name.lower()
     for k, pat in [('lovable','lov'),('bolt','bolt'),('v0','v0'),('base44','base'),('rork','rork')]:
@@ -25,7 +27,7 @@ if __name__ == '__main__':
     if cmd == 'ingest':
         cp = sys.argv[2]
         for f in sys.argv[3:]:
-            d = extract(open(f).read(), int(cp))
+            d = extract(open(f, encoding='utf-8').read(), int(cp))
             cid = cid_of(d.get('company', '')) or cid_of(os.path.basename(f))
             if not cid: print('!! не понял компанию', f, d.get('company')); continue
             s['raw'].setdefault(cp, {})[cid] = d
@@ -35,7 +37,7 @@ if __name__ == '__main__':
             print(f'=== {cid}'); print(json.dumps(short, ensure_ascii=False))
         save(s)
     elif cmd == 'moves':
-        cp = int(sys.argv[2]); mv = json.load(open(sys.argv[3]))
+        cp = int(sys.argv[2]); mv = json.load(open(sys.argv[3], encoding='utf-8'))
         while len(s['quarters']) < cp: s['quarters'].append({})
         for cid, m in mv.items():
             if 'plans' not in m:
@@ -45,7 +47,7 @@ if __name__ == '__main__':
             s['quarters'][cp-1][cid] = m
         save(s); print('ok', list(mv))
     elif cmd == 'render':
-        view = sys.argv[2]; out = sys.argv[3] if len(sys.argv) > 3 else BASE + '/live/index.html'
+        view = sys.argv[2]; out = sys.argv[3] if len(sys.argv) > 3 else os.path.join(LIVE, 'index.html')
         if view.startswith('public'): h = dashboard.view_public(s, int(view[-1]))
         elif view == 'sim1':
             r = sim.run({'quarters': s['quarters']}, seed=s['seed'], upto=2); h = dashboard.view_sim1(s, r)
@@ -53,7 +55,8 @@ if __name__ == '__main__':
         else:
             r = sim.run({'quarters': s['quarters']}, seed=s['seed']); fs = sim.final_scores(r, s['icps']); h = dashboard.view_final(s, r, fs)
             print({k: {c: round(v, 1) for c, v in fs[k].items()} for k in ('goals', 'final')})
-        open(out, 'w').write(h); print('rendered', out)
+        os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
+        open(out, 'w', encoding='utf-8').write(h); print('rendered', out)
     elif cmd == 'reset':
         if os.path.exists(ST): os.remove(ST)
         print('reset')
