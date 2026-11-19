@@ -38,21 +38,18 @@ def test_missing_submission_is_not_a_crash_for_any_company():
         assert res['hist'][-1][cid]['spent_total'] == 0
 
 
-@pytest.mark.xfail(strict=True, reason='B3: unknown channel id crashes the run')
 def test_unknown_channel_skipped():
     res = run(quarter(rork=dict(spend={'tiktok': 10000, 'creators': 20000})))
     assert res['hist'][0]['rork']['spent_total'] == 20000
     assert any('tiktok' in l for l in res['logs']['rork'])
 
 
-@pytest.mark.xfail(strict=True, reason='B4: unknown action id is ignored without a log line')
 def test_unknown_action_skipped():
     res = run(quarter(rork=dict(actions=[{'id': 'bribe'}])))
     assert res['hist'][0]['rork']['spent_total'] == 0
     assert any('bribe' in l for l in res['logs']['rork'])
 
 
-@pytest.mark.xfail(strict=True, reason='B20: a known card with a missing field crashes the run')
 def test_card_with_missing_fields_skipped():
     res = run(quarter(bolt=dict(actions=[{'id': 'attack', 'seg': 'fnd'}, {'id': 'copy'},
                                          {'id': 'exclusive'}, {'id': 'team_deal'}, {'id': 'mna'}])))

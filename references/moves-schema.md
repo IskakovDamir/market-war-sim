@@ -128,3 +128,13 @@ The full game file wraps checkpoint objects: `{"quarters": {"type": "array", "ma
 
 Here v0 has no `plans` and no `spend`: `live.py moves` fills both from v0's ingested doc for that checkpoint.
 
+
+## Invalid input
+
+The sim never crashes on a bad id:
+
+- unknown company id: the move is skipped and listed in `res["warnings"]`;
+- unknown channel id: the spend is skipped, not charged, and a log line is added;
+- unknown action id, or a card missing `target`/`seg`/`partner`: the card is skipped, not charged, and a log line is added.
+
+Logs appear in the "события" block of the final dashboard, so fix typos before the final render.

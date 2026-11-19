@@ -67,6 +67,9 @@ Users that land after quarter 3 are lost: partners money in Q3 burns, SEO in Q3 
 
 ## One quarter, in order
 
+### 0. Input check
+Unknown company ids are dropped and listed in `res["warnings"]`. Unknown channels, unknown cards and cards missing a field they need (`target`, `seg`, `partner`; for mna `target` with `price`, or `buyer`) are dropped with a log line, are not charged and have no effect.
+
 ### 1. Missing submissions
 A company without a move this quarter replays its previous move (first quarter: one plan "Pro" at list price, icp `fnd`, all scores 5) with `spend = {}`, `actions = []`, `consistency = 1`.
 

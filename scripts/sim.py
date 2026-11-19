@@ -15,7 +15,7 @@ move = {
 """
 import json, math, random, sys, copy
 sys.path.insert(0, BASE)
-from spec import SEGMENTS, SEG_IDS, COMPANIES, CHANNELS, PAID_COST, FREE_COST
+from spec import SEGMENTS, SEG_IDS, COMPANIES, CHANNELS, ACTIONS, PAID_COST, FREE_COST
 SEG = {s['id']: s for s in SEGMENTS}
 CH = {c['id']: c for c in CHANNELS}
 CO = {c['id']: c for c in COMPANIES}
@@ -35,6 +35,29 @@ def chosen_price(plans, seg):
     return ok[-1] if ok else paid[0]
 
 def has_free(plans): return any(p['price'] == 0 for p in plans)
+
+CARDS = {a['id'] for a in ACTIONS}
+CARD_FIELDS = dict(attack=('target', 'seg'), copy=('target', 'seg'), exclusive=('seg',), team_deal=('partner',))
+
+def card_ok(a):
+    """A known card with every field it needs, pointing at real companies and segments."""
+    if 'seg' in a and a['seg'] not in SEG: return False
+    if a['id'] == 'mna':
+        return (a.get('target') in CO and 'price' in a) or a.get('buyer') in CO
+    return all(a.get(f) in (SEG if f == 'seg' else CO) for f in CARD_FIELDS.get(a['id'], ()))
+
+def clean_move(mv, log, q):
+    """Drop unknown channels, unknown cards and cards with missing fields, with a log line each."""
+    spend, actions = {}, []
+    for ch, amt in mv.get('spend', {}).items():
+        if ch in CH: spend[ch] = amt
+        else: log.append(f"Q{q}: неизвестный канал «{ch}» пропущен")
+    for a in mv.get('actions', []):
+        aid = a.get('id')
+        if aid not in CARDS: log.append(f"Q{q}: неизвестная карточка «{aid}» пропущена")
+        elif not card_ok(a): log.append(f"Q{q}: карточка «{aid}» без нужных полей пропущена")
+        else: actions.append(a)
+    return dict(mv, spend=spend, actions=actions)
 
 def run(moves, seed=7, upto=None):
     rnd = random.Random(seed)
@@ -59,6 +82,7 @@ def run(moves, seed=7, upto=None):
         for cid in [c for c in qmoves if c not in CO]:   # unknown company id: skip, do not crash
             warnings.append(f"Q{q}: неизвестная компания «{cid}» пропущена")
             del qmoves[cid]
+        for cid in qmoves: qmoves[cid] = clean_move(qmoves[cid], st[cid]['log'], q)
         for c in COMPANIES:   # a team that did not submit keeps its offer and spends nothing
             cid = c['id']
             if cid not in qmoves:
