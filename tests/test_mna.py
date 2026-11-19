@@ -73,11 +73,13 @@ def test_repeat_declaration_charged_once():
     assert sum('купили Rork' in l for l in res['logs']['lovable']) == 1
 
 
-@pytest.mark.xfail(strict=True, reason='B10: M&A price is not checked against the buyer budget')
 def test_price_above_budget_rejected():
     res = run(deal(price=5_000_000))
     assert res['owners']['rork'] == 'rork'
     assert res['hist'][0]['lovable']['spent_total'] == 0
+    assert any('больше остатка бюджета' in l for l in res['logs']['lovable'])
+    ok = run(deal(price=1_000_000))
+    assert ok['owners']['rork'] == 'lovable'
 
 
 def test_acquired_company_cannot_buy_and_cannot_be_bought_twice():
