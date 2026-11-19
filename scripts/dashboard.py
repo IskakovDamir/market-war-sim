@@ -57,6 +57,29 @@ table.t td.n{text-align:right;font-variant-numeric:tabular-nums}
 .q{font-size:18px;line-height:1.45;margin-top:8px}
 .legend{display:flex;gap:22px;flex-wrap:wrap;font-size:17px;margin:6px 0 10px}.legend span{display:flex;align-items:center;gap:8px}.legend i{width:22px;height:4px;border-radius:2px;display:inline-block}
 svg text{font-family:inherit}
+.mob{display:none}
+@media (max-width:700px){
+body{padding:20px 16px 40px}
+.top{flex-wrap:wrap;gap:10px;margin-bottom:20px}.top img{width:32px;height:32px}
+.brand{font-size:16px}.when{flex-basis:100%;margin-left:0;font-size:14px}
+h1{font-size:38px;line-height:1.08}
+.sub{font-size:17px;margin:10px 0 22px}
+.grid{grid-template-columns:1fr;gap:14px}
+.card{padding:20px 18px}.wide{padding:20px 16px;margin-bottom:14px}
+.name{font-size:22px}.pv{font-size:19px}.ad{font-size:17px}.fs b{font-size:18px}.plans{font-size:16px}.chg{font-size:13px}
+.desk{display:none}.mob{display:block}
+table.t{font-size:16px}
+table.rank tr:first-child,table.nums tr:first-child{display:none}
+table.rank tr{display:grid;grid-template-columns:28px 1fr auto;grid-template-areas:"rk co sc" "bar bar bar" "det det det";align-items:center;column-gap:10px;padding:12px 0;border-bottom:1px solid #E6ECF5}
+table.rank td{display:block;padding:0;border:0}
+table.rank td.rk{grid-area:rk;font-size:24px}table.rank td:nth-child(2){grid-area:co}
+table.rank td:nth-child(3){grid-area:bar;padding:10px 0 6px}table.rank td:nth-child(4){grid-area:sc}table.rank td:nth-child(5){grid-area:det}
+.bar{min-width:0}
+table.nums tr{display:grid;grid-template-columns:1fr 1fr;column-gap:16px;padding:12px 0;border-bottom:1px solid #E6ECF5}
+table.nums td{display:flex;justify-content:space-between;gap:8px;padding:3px 0;border:0}
+table.nums td:first-child{grid-column:1/-1;font-weight:600;font-size:18px}table.nums td:last-child{grid-column:1/-1;padding-top:6px}
+table.nums td.n::before{content:attr(data-label);color:#5B6675;font-size:14px;text-align:left}
+}
 """
 def page(title, body, when):
     return f"""<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -109,6 +132,21 @@ def users_svg(hist, start_users):
     out.append('</svg>')
     return ''.join(out)
 
+def users_svg_mobile(hist, start_users):
+    last = hist[-1]
+    rows = sorted(ORDER, key=lambda c: -last[c]['users'])
+    mx = max(max(last[c]['users'] for c in ORDER), max(start_users.values())) * 1.05
+    W, RH = 330, 66
+    out = [f'<svg viewBox="0 0 {W} {RH * len(rows)}" width="100%" role="img" aria-label="Пользователи по компаниям">']
+    for i, c in enumerate(rows):
+        y = i * RH; u = last[c]['users']; s0 = start_users[c]; d = (u - s0) / s0 * 100
+        out.append(f'<g data-company="{c}"><text x="0" y="{y+18}" font-size="16" font-weight="600" fill="#04131B">{E(CO[c]["name"])}</text>')
+        out.append(f'<text x="{W}" y="{y+18}" text-anchor="end" font-size="15" fill="#04131B"><tspan font-weight="600">{fmt(u)}</tspan><tspan font-size="14" fill="#5B6675"> {d:+.0f}% к старту</tspan></text>')
+        out.append(f'<rect x="0" y="{y+28}" width="{max(4, W * u / mx):.0f}" height="20" rx="4" fill="#04131B"><title>{E(CO[c]["name"])}: {fmt(u)} пользователей, на старте {fmt(s0)}</title></rect>')
+        out.append(f'<line x1="{W * s0 / mx:.0f}" y1="{y+24}" x2="{W * s0 / mx:.0f}" y2="{y+52}" stroke="#F5000D" stroke-width="3"/></g>')
+    out.append('</svg>')
+    return ''.join(out)
+
 def start_users():
     return {c['id']: sum(c['paid'].values()) + c['free'] for c in COMPANIES}
 
@@ -126,7 +164,7 @@ def view_sim1(state, res):
         ptab = f'<div class="wide"><div class="lbl" style="margin-top:0">прогнозы: средняя ошибка</div><table class="t"><tr><th>команда</th><th class="n">ошибка</th><th></th></tr>{rows}</table></div>'
     body = f'''<h1>симуляция 1<span>пользователи после двух кварталов</span></h1>
 <div class="sub">Пользователи: бесплатные и платящие вместе. Красная черта: сколько было на старте. Выручку покажем только в финале</div>
-<div class="wide">{users_svg(res["hist"], su)}</div>{ptab}'''
+<div class="wide"><div class="desk">{users_svg(res["hist"], su)}</div><div class="mob">{users_svg_mobile(res["hist"], su)}</div></div>{ptab}'''
     return page('Симуляция 1', body, 'после чекпоинта 2')
 
 def mrr_svg(res):
@@ -157,7 +195,24 @@ def mrr_svg(res):
         out.append(f'<text data-company="{c}" x="{W-Rm+14}" y="{y+5:.0f}" font-size="16" font-weight="600" fill="#04131B">{E(CO[c]["name"])} {money(v)}</text>')
     out.append('</svg>')
     leg = ''.join(f'<span data-company="{c}"><i style="background:{SER[c]}"></i>{E(CO[c]["name"])}</span>' for c in ORDER)
-    return f'<div class="legend">{leg}</div>' + ''.join(out)
+    return f'<div class="legend">{leg}</div><div class="desk">' + ''.join(out) + f'</div><div class="mob">{mrr_svg_mobile(pts, step, mx)}</div>'
+
+def mrr_svg_mobile(pts, step, mx):
+    W, H, L, B, R = 330, 280, 46, 34, 36
+    X = lambda i: L + (W - L - R) * i / 3
+    Y = lambda v: (H - B) - (H - B - 12) * v / mx
+    out = [f'<svg viewBox="0 0 {W} {H}" width="100%" role="img" aria-label="Выручка в месяц по кварталам">']
+    for k in range(0, int(round(mx / step)) + 1):
+        v = step * k
+        out.append(f'<line x1="{L}" y1="{Y(v):.0f}" x2="{W-R+30}" y2="{Y(v):.0f}" stroke="#E6ECF5"/><text x="{L-8}" y="{Y(v)+5:.0f}" font-size="13" fill="#5B6675" text-anchor="end">{money(v)}</text>')
+    for i, q in enumerate(['старт', 'квартал 1', 'квартал 2', 'квартал 3']):
+        out.append(f'<text x="{X(i):.0f}" y="{H-8}" font-size="13" fill="#5B6675" text-anchor="middle">{q}</text>')
+    for c in ORDER:
+        p = ' '.join(f'{X(i):.1f},{Y(v):.1f}' for i, v in enumerate(pts[c]))
+        out.append(f'<g data-company="{c}"><polyline points="{p}" fill="none" stroke="{SER[c]}" stroke-width="2.5" stroke-linejoin="round"/>')
+        out.append(''.join(f'<circle cx="{X(i):.1f}" cy="{Y(v):.1f}" r="4" fill="{SER[c]}" stroke="#fff" stroke-width="2"/>' for i, v in enumerate(pts[c])) + '</g>')
+    out.append('</svg>')
+    return ''.join(out)
 
 def view_final(state, res, fs):
     last = res['hist'][-1]; tot = sum(last[c]['mrr'] for c in ORDER)
@@ -173,13 +228,13 @@ def view_final(state, res, fs):
         rows.append(f'<tr><td class="rk">{i+1}</td><td>{hh}</div></td>'
                     f'<td><div class="bar"><i style="width:{min(100,total[c]):.0f}%"></i></div></td><td class="n" style="font-size:26px;font-weight:600">{total[c]:.0f}</td>'
                     f'<td class="small">цель {fs["goals"][c]:.0f}% · эффективность {fs["eff_score"][c]:.0f}{b}{note}</td></tr>')
-    ranking = f'<div class="wide"><div class="lbl" style="margin-top:0">итоговый счёт: 70% цель роли, 30% эффективность денег</div><table class="t"><tr><th></th><th>компания</th><th>счёт</th><th class="n"></th><th>из чего</th></tr>{"".join(rows)}</table></div>'
+    ranking = f'<div class="wide"><div class="lbl" style="margin-top:0">итоговый счёт: 70% цель роли, 30% эффективность денег</div><table class="t rank"><tr><th></th><th>компания</th><th>счёт</th><th class="n"></th><th>из чего</th></tr>{"".join(rows)}</table></div>'
     det = []
     for c in ORDER:
         h = last[c]
         spent = h['spent_total']; cac = [x[c]['cac'] for x in res['hist'] if x[c]['cac']]
-        det.append(f'<tr data-company="{c}"><td>{E(CO[c]["name"])}</td><td class="n">{fmt(h["users"])}</td><td class="n">{fmt(h["paid"])}</td><td class="n">{money(h["mrr"])}</td><td class="n">{h["mrr"]/tot*100:.0f}%</td><td class="n">{money(spent)}</td><td class="n">{"$"+fmt(sum(cac)/len(cac)) if cac else "-"}</td><td class="small">{E(CO[c]["goal"])}</td></tr>')
-    table = f'<div class="wide"><div class="lbl" style="margin-top:0">цифры после третьего квартала</div><table class="t"><tr><th>компания</th><th class="n">пользователи</th><th class="n">платящие</th><th class="n">выручка в месяц</th><th class="n">доля</th><th class="n">потрачено</th><th class="n">средний CAC</th><th>цель роли</th></tr>{"".join(det)}</table></div>'
+        det.append(f'<tr data-company="{c}"><td>{E(CO[c]["name"])}</td><td class="n" data-label="пользователи">{fmt(h["users"])}</td><td class="n" data-label="платящие">{fmt(h["paid"])}</td><td class="n" data-label="выручка в месяц">{money(h["mrr"])}</td><td class="n" data-label="доля">{h["mrr"]/tot*100:.0f}%</td><td class="n" data-label="потрачено">{money(spent)}</td><td class="n" data-label="средний CAC">{"$"+fmt(sum(cac)/len(cac)) if cac else "-"}</td><td class="small">{E(CO[c]["goal"])}</td></tr>')
+    table = f'<div class="wide"><div class="lbl" style="margin-top:0">цифры после третьего квартала</div><table class="t nums"><tr><th>компания</th><th class="n">пользователи</th><th class="n">платящие</th><th class="n">выручка в месяц</th><th class="n">доля</th><th class="n">потрачено</th><th class="n">средний CAC</th><th>цель роли</th></tr>{"".join(det)}</table></div>'
     quotes = state.get('quotes', {})
     qc = []
     for c in ORDER:
