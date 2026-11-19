@@ -294,7 +294,7 @@ def run(moves, seed=7, upto=None):
                 if price > 0:
                     pnew = price * (1.15 if st[cid]['decoy'] else 1) * (1.10 if st[cid]['upsell'] else 1)
                     old = st[cid]['paid'][s]; a_old = st[cid]['arpu'][s]
-                    if price < a_old: a_old = price   # price cut reaches existing customers
+                    if price < st[cid]['prev_price'][s]: a_old = min(a_old, price)   # a real price cut reaches existing customers
                     st[cid]['arpu'][s] = (old * a_old + np_ * pnew) / max(1e-9, old + np_)
                 st[cid]['paid'][s] += np_
                 st[cid]['free'][s] += arrivals[cid][s] * (1 - rate) + sales_arr[cid][s] * 0.4

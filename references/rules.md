@@ -146,7 +146,7 @@ new free   = arrivals x (1 - rate) + 0.4 x sales arrivals
 Cohort ARPU per segment:
 ```
 new customers pay  price x 1.15 (decoy, from the quarter it was played) x 1.10 (upsell, same)
-existing customers keep their ARPU; if price < their ARPU they drop to price
+existing customers keep their ARPU; only a real price cut (price < last quarter's chosen price for the segment) moves them to min(ARPU, price)
 ARPU = (old paid x old ARPU + new paid x new price) / (old paid + new paid)
 ```
 Custom card with `"as": X` applies X's conversion effect.

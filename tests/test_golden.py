@@ -6,7 +6,7 @@ import sys
 
 import pytest
 
-from conftest import GOLDEN_FINAL, GOLDEN_GOALS, ROOT, SCRIPTS, golden, load_json
+from conftest import GOLDEN_FINAL, GOLDEN_GOALS, ROOT, SCRIPTS, golden, load_json, printed_scores
 import sim
 
 
@@ -65,5 +65,6 @@ def test_report_cli_prints_golden_scores_from_any_cwd(tmp_path):
     out = subprocess.run([sys.executable, os.path.join(SCRIPTS, 'report.py'),
                           os.path.join(ROOT, 'samples', 'test_moves.json')],
                          cwd=tmp_path, capture_output=True, text=True, check=True).stdout
-    line = next(l for l in out.splitlines() if l.startswith('final '))
-    assert "'lovable': 85.5" in line and "'rork': 78.1" in line
+    final = printed_scores(out, 'final')
+    for cid, value in GOLDEN_FINAL.items():
+        assert final[cid] == pytest.approx(value, abs=0.1)

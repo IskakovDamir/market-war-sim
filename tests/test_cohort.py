@@ -50,10 +50,16 @@ def test_decoy_and_upsell_raise_new_customer_price():
     assert q2['seg_arpu'][s] == pytest.approx((old * 25 + new * 25 * 1.15 * 1.10) / (old + new))
 
 
-@pytest.mark.xfail(strict=True, reason='B12: premium of existing customers is wiped when the price does not change')
 def test_premium_survives_unchanged_price():
     res = run(quarter(lovable=dict(spend={'social': 200000}, actions=[{'id': 'decoy'}])), quarter())
     q1, q2 = res['hist'][0]['lovable'], res['hist'][1]['lovable']
     assert q1['seg_arpu']['fnd'] > 25
     for s in SEG_IDS:
         assert q2['seg_arpu'][s] == pytest.approx(q1['seg_arpu'][s]), s
+
+
+def test_price_cut_after_a_premium_moves_existing_customers_to_the_new_price():
+    res = run(quarter(lovable=dict(spend={'social': 200000}, actions=[{'id': 'decoy'}])),
+              quarter(lovable=dict(plans=PRO(20))))
+    q2 = res['hist'][1]['lovable']
+    assert all(q2['seg_arpu'][s] == pytest.approx(20) for s in SEG_IDS)

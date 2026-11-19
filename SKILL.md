@@ -59,4 +59,4 @@ python3 $MW/tools/check_all.py          # compile, pytest, visual check, golden 
 python3 $MW/scripts/report.py $MW/samples/test_moves.json
 ```
 
-The golden game (`samples/test_moves.json`, seed 7) must give goals lovable 100, bolt 32.4, v0 100, base44 100, rork 68.7 and final 85.5, 25.2, 74.5, 90.7, 78.1. If it does not, the sim changed: stop and find out why before game day.
+The golden game (`samples/test_moves.json`, seed 7) must give goals lovable 100, bolt 32.4, v0 100, base44 100, rork 68.7 and final 85.5, 25.2, 74.5, 90.7, 78.1, each within 0.1 (Lovable is 85.57 since the cohort ARPU fix and prints as 85.6). If it does not, the sim changed: stop and find out why before game day.

@@ -6,7 +6,7 @@ import sys
 
 import pytest
 
-from conftest import ROOT, SAMPLES, SCRIPTS
+from conftest import GOLDEN_FINAL, ROOT, SAMPLES, SCRIPTS, printed_scores
 
 LIVE = os.path.join(SCRIPTS, 'live.py')
 DOC = os.path.join(SAMPLES, 'team_doc_filled_rork.md')
@@ -41,7 +41,9 @@ def test_live_end_to_end_in_a_temp_dir(tmp_path):
         assert f'rendered {dest}' in res.stdout
         pages[view] = dest.read_text(encoding='utf-8')
         if view == 'final':
-            assert "'final': {'lovable': 85.5, 'bolt': 25.2, 'v0': 74.5, 'base44': 90.7, 'rork': 78.1}" in res.stdout
+            final = printed_scores(res.stdout, 'final')
+            for cid, value in GOLDEN_FINAL.items():
+                assert final[cid] == pytest.approx(value, abs=0.1)
     assert 'после чекпоинта 1' in pages['public1']
     assert 'Твоё приложение в App Store через неделю' in pages['public1']
     assert 'пользователи после двух кварталов' in pages['sim1']

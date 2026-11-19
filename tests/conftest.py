@@ -33,6 +33,17 @@ QUIET_SCORES = {
 FREE_PRO = [{'name': 'Free', 'price': 0}, {'name': 'Pro', 'price': 25}]
 
 
+def printed_scores(stdout, key):
+    """The {'goals': {...}, 'final': {...}} or "final {...}" dict a CLI printed, as numbers."""
+    import ast
+    for line in stdout.splitlines():
+        if line.startswith(key + ' '):
+            return ast.literal_eval(line[len(key) + 1:])
+        if line.startswith('{') and f"'{key}'" in line:
+            return ast.literal_eval(line)[key]
+    raise AssertionError(f'{key} not printed:\n{stdout}')
+
+
 def load_json(name):
     with open(os.path.join(SAMPLES, name), encoding='utf-8') as f:
         return json.load(f)
