@@ -7,7 +7,6 @@ from extract import extract, money
 
 FILLED = open(os.path.join(SAMPLES, 'team_doc_filled_rork.md'), encoding='utf-8').read()
 TEMPLATE = open(os.path.join(SAMPLES, 'team_doc_template.md'), encoding='utf-8').read()
-B2 = pytest.mark.xfail(strict=True, reason='B2: unit letters inside words count as units')
 
 
 @pytest.mark.parametrize('text,value', [
@@ -33,11 +32,13 @@ def test_money(text, value):
     assert money(text) == value
 
 
-@B2
 def test_money_unit_inside_word():
     assert money('$29 со скидкой') == 29
     assert money('25 мес') == 25
     assert money('$40 в месяц') == 40
+    assert money('50 тысяч') == 50000
+    assert money('2 млн') == 2000000
+    assert money('50kz') == 50
 
 
 def test_extract_filled_doc_checkpoint_1():

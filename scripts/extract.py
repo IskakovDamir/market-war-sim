@@ -10,12 +10,13 @@ def money(s):
     s = re.sub(r'(?<=\d),(?=\d{3}(?!\d))', '', s)   # thousands separator: 50,000 and 1,200,000
     s = s.replace(',', '.')                          # decimal comma: 1,5к
     if not s: return 0
-    m = re.search(r'(\d+(?:\.\d+)?)(k|к|тыс|m|м|млн)?', s)
+    m = re.search(r'\d+(?:\.\d+)?', s)
     if not m: return 0
-    v = float(m.group(1)); u = m.group(2) or ''
-    if u in ('k', 'к', 'тыс'): v *= 1000
+    v = float(m.group(0))
+    u = re.match(r'(тыс\w*|млн|k|к|m|м)(?![a-zа-яё])', s[m.end():])   # a unit only right after the number, not inside a word
+    u = u.group(1) if u else ''
+    if u in ('k', 'к') or u.startswith('тыс'): v *= 1000
     elif u in ('m', 'м', 'млн'): v *= 1e6
-    elif v < 1000 and ('k' in s or 'к' in s): v *= 1000
     return round(v)
 def tables(block):
     out, cur = [], []
