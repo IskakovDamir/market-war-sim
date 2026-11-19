@@ -298,7 +298,9 @@ def run(moves, seed=7, upto=None):
             snap[cid] = dict(users=paid + free, paid=paid, mrr=mrr, seg_rev=seg_rev, new_paid=npaid,
                              spend=q_spend[cid], cac=q_spend[cid] / npaid if npaid > 1 else None,
                              ai_cost=ai_cost, score=dict(score[cid]), spent_total=st[cid]['spent'],
-                             budget_left=CO[cid]['budget'] - st[cid]['spent'])
+                             budget_left=CO[cid]['budget'] - st[cid]['spent'],
+                             seg_paid=dict(st[cid]['paid']), seg_arpu=dict(st[cid]['arpu']),
+                             arrivals={s: arrivals[cid][s] + sales_arr[cid][s] for s in SEG_IDS})
         hist.append(snap)
     return dict(hist=hist, start_mrr=start_mrr, logs={c: st[c]['log'] for c in st},
                 owners={c: st[c]['owner'] for c in st})
