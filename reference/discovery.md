@@ -127,6 +127,7 @@ Every row was run before writing it here; "Got" is the measured output. Commands
 | B18 | dashboard.py:178 | UI uses an en dash as the empty CAC placeholder (UI text rule: no em or en dashes) | U+2013 en dash | ASCII placeholder | test_dashboard.py::test_no_em_or_en_dash |
 | B19 | dashboard.py CSS | fixed 3 column grid, 64px heading, 8 column tables and 1280-unit SVG charts at 390px phone width | measured in step 4 by tools/visual_check.py before the fix: 6/6 desktop pages pass, 6/6 phone pages fail; the page scrolls sideways (730 to 924px wide), the card grid is 673 to 868px wide inside 278px, chart text renders at 2.5 to 3.6px | no overflow, no overlap, chart text >= 12px | tools/visual_check.py |
 | B20 | sim.py:258, 98, 114, 94 | found while writing tests in step 3: a known card with a missing field (attack or copy without `target`/`seg`, exclusive without `seg`, team_deal without `partner`, mna without `target`) crashes the run | KeyError: 'target' | skipped with a log line | test_robustness.py::test_card_with_missing_fields_skipped |
+| B21 | dashboard.py:107 | found by eye in the step 4 screenshots: in the sim 1 users chart, a company with fewer users than at the start has its red start tick to the right of the bar, exactly where the value label starts, so the tick cuts through the number (golden game: v0, 21 803 users, -5%) | tick covers "21 803" | label after the tick | tools/visual_check.py (chart mark check) |
 
 Reproduction commands (repo root, commit `890a721`):
 

@@ -128,7 +128,8 @@ def users_svg(hist, start_users):
         out.append(f'<g data-company="{c}"><text x="0" y="{y+30}" font-size="22" font-weight="600" fill="#04131B">{E(CO[c]["name"])}</text>')
         out.append(f'<rect x="{L}" y="{y+8}" width="{max(4,w):.0f}" height="34" rx="4" fill="#04131B"><title>{E(CO[c]["name"])}: {fmt(u)} пользователей, на старте {fmt(s0)}</title></rect>')
         out.append(f'<line x1="{x0:.0f}" y1="{y+2}" x2="{x0:.0f}" y2="{y+48}" stroke="#F5000D" stroke-width="3"/>')
-        out.append(f'<text x="{L+max(4,w)+12:.0f}" y="{y+32}" font-size="20" font-weight="600" fill="#04131B">{fmt(u)}</text><text x="{L+max(4,w)+12+len(fmt(u))*12+16:.0f}" y="{y+32}" font-size="18" fill="#5B6675">{d:+.0f}% к старту</text></g>')
+        tx = max(L + max(4, w), x0 + 2) + 12   # after the bar and after the start tick when users fell below the start
+        out.append(f'<text x="{tx:.0f}" y="{y+32}" font-size="20" font-weight="600" fill="#04131B">{fmt(u)}</text><text x="{tx+len(fmt(u))*12+16:.0f}" y="{y+32}" font-size="18" fill="#5B6675">{d:+.0f}% к старту</text></g>')
     out.append('</svg>')
     return ''.join(out)
 
